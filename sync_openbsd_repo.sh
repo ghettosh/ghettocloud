@@ -6,20 +6,20 @@ declare -A files
 declare -a flavors
 declare -a arches
 declare -a supported
-CURL=`which curl` > /dev/null 2>&1 \
-    || { echo "FATAL: You need curl to continue"; exit 1; }
+#CURL=`which curl` > /dev/null 2>&1 \
+#    || { echo "FATAL: You need curl to continue"; exit 1; }
 SHA256SUM=`which sha256sum` > /dev/null 2>&1 \
     || SHA256SUM=`which sha256` \
         || { echo "FATAL: you need sha256sum to continue"; exit 1; }  
 
-arches=( amd64 )
-flavors=( 5.4 snapshots )
+arches=( amd64 )            # Configure me - Download these architectures
+flavors=( 5.4 snapshots )   # Configure me - for these versions of OpenBSD
 
 for ARCH in ${arches[@]}; do
     for FLAVOR in ${flavors[@]}; do
       echo "[+] Doing flavor: ${FLAVOR} [${ARCH}] at $(date +%h-%d,%H:%M)"
       files=()
-      URL=http://openbsd.mirrorcatalogs.com/${FLAVOR}/${ARCH}/
+      URL=http://openbsd.mirrorcatalogs.com/${FLAVOR}/${ARCH}/             # Configure me - set the mirror URL to somewhere close to you
       SHAURL=$URL/SHA256
       MIRRORDIR=./openbsd-mirror-${FLAVOR}-${ARCH}
       TMPFILE=`mktemp`

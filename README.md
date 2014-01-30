@@ -1,5 +1,14 @@
 OpenBSD Cloud
 -------------
+
+Pre Requisites
+--------------
+
+  * 1 or more Linux boxes with libvirt,virt-install installed
+  * at least one OpenBSD machine serving as at least a DHCP server with at least 1GB of storage
+  * 
+  
+
 This directory represents a few things:
 
   * the tftpboot directory hosted from a next-server
