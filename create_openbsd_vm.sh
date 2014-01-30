@@ -130,6 +130,7 @@ function doit(){
 }
 
 function usage(){
+    # 0200 coding, deal with it!
     banner
     echo
     tput setf 4
