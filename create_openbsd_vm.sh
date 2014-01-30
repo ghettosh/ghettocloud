@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+# This script is pretty specific to my environment; grep for 'Configure me' to see what you should
+# change.
+#
+# This script does the following:
+#  
+#   generate_random_mac
+#     generates a mac address manually so we can track this VM from the beginning of its life
+#   
+#   make_openbsd_answerfile ${MAC} ${VM}
+#     Make an answer file using the MAC and VM name as seeds
+#
+#   make_virsh_script ${MAC} ${VM}
+#     Make a shellscript we can ship to a remote host and run using the MAC and VM name as seeds
+#
+#   doit
+#     Send the mentioned shellscript to a remote host and run it.
+#
+
 export TERM=xterm
 if [[ "$(uname)" != "OpenBSD" ]]; then
     echo "This script is only meant to run on OpenBSD."
@@ -49,6 +67,7 @@ function make_openbsd_answerfile(){
         cp ${ANSWER_FILE} ${FILE} 
         return
     fi
+    # Configure me - you will likely want to change this answerfile
     echo "INFO: Writing ${FILE}"
     cat << EOT > ${FILE}
 system hostname = ${NAME}
@@ -71,6 +90,12 @@ EOT
 function make_virsh_script(){
     MAC=${1}
     VM=${2}
+    # Configure me - the INSTALL_SCRIPT variable contains a variable called 'str'. I have to do this because the
+    # version of virt-install on my centos hypervisors is not recent enough to support automagically adding 
+    # a port to a vswitch. We print the XML for a domain without any NICs then manually add the interface stanza
+    # via sed, like a caveman. If you are cool enough to be running openvswitch-trunk on centos65 like I am, just
+    # make sure you set the bridge properly. Otherwise you can pretty much take out the 'str' crap and change 
+    # --nonetworks in the virt-install command to something you would normally use, e.g. --network bridge=br2
     INSTALL_SCRIPT="./install_scripts/install-${VM}.sh"
     echo "INFO: Writing ${INSTALL_SCRIPT}"
     echo "str=\"  <interface type='bridge'>\n\"                                        " > ${INSTALL_SCRIPT}    
