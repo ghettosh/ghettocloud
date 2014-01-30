@@ -6,11 +6,14 @@ declare -A files
 declare -a flavors
 declare -a arches
 declare -a supported
+if [[ "$(uname)" != "OpenBSD" ]]; then
+    echo "This script is meant to only be run from OpenBSD."
+    exit 1
+fi
+
 #CURL=`which curl` > /dev/null 2>&1 \
 #    || { echo "FATAL: You need curl to continue"; exit 1; }
-SHA256SUM=`which sha256sum` > /dev/null 2>&1 \
-    || SHA256SUM=`which sha256` \
-        || { echo "FATAL: you need sha256sum to continue"; exit 1; }  
+SHA256SUM=`which sha256` 
 
 arches=( amd64 )            # Configure me - Download these architectures
 flavors=( 5.4 snapshots )   # Configure me - for these versions of OpenBSD
@@ -29,7 +32,8 @@ for ARCH in ${arches[@]}; do
         mkdir ${MIRRORDIR}
       fi
       
-      $CURL -sq $SHAURL > $TMPFILE 2>&1 || \
+      # $CURL -sq $SHAURL > $TMPFILE 2>&1 || \
+      ftp -Vo ${TMPFILE} ${SHAURL} 2>&1 || \
         { echo "FATAL: could not get the remote manifest. exiting"; \
           exit 1; }
       # We need to use a tempfile because ${files[@]} won't inherit otherwise
@@ -44,7 +48,8 @@ for ARCH in ${arches[@]}; do
         printf "[${FLAVOR}] checking $ITEM... "
         if [[ ! -f $MIRRORDIR/${ITEM} ]]; then
           UPDATED=1
-          ${CURL} -sq ${URL}/${ITEM} > ${MIRRORDIR}/${ITEM} && \
+          # ${CURL} -sq ${URL}/${ITEM} > ${MIRRORDIR}/${ITEM} && \
+          ftp -Vo ${MIRRORDIR}/${ITEM} ${URL}/${ITEM} && \
             { echo "downloaded"; } || { echo "failed"; }
         else
           if [[ -f ${MIRRORDIR}/.sums ]]; then 
@@ -56,7 +61,8 @@ for ARCH in ${arches[@]}; do
           if [[ ${CURRENTSUM} != ${files[$ITEM]} ]]; then
             UPDATED=1
             printf "update required... "
-            ${CURL} -sq ${URL}/${ITEM} > ${MIRRORDIR}/${ITEM}  && \
+            # ${CURL} -sq ${URL}/${ITEM} > ${MIRRORDIR}/${ITEM}  && \
+            ftp -Vo ${MIRRORDIR}/${ITEM} ${URL}/${ITEM} && \
             echo "ok"
           else
             echo "update not required"
