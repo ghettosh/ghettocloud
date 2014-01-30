@@ -6,28 +6,27 @@ ion OpenBSD virtual machines.
 
 It provides me with the ability to do the following:
 
-    root@router:/data/serve # ./create_openbsd_vm.sh fuckshit
+    root@router:/data/serve # ./create_openbsd_vm.sh hobags
     
     ********************************************************************************
     OpenBSD VM Creator
     ********************************************************************************
-    INFO: Chose 00:de:ad:d4:18:dd
-    INFO: Writing ./00:de:ad:d4:18:dd-install.conf
-    INFO: Wrote ./00:de:ad:d4:18:dd-install.conf
-    INFO: Root password will be:  6c7e2a05fac5
-    INFO: Writing ./install_scripts/install-fuckshit.sh
-    INFO: Wrote ./install_scripts/install-fuckshit.sh
-    INFO: Choosing random destination for this host
+    INFO: generating a MAC address
+    INFO: Chose 00:de:ad:2d:7a:93
+    INFO: Writing seed file: ./00:de:ad:2d:7a:93-install.conf
+    INFO: Wrote ./00:de:ad:2d:7a:93-install.conf
+    INFO: Root password will be:  a9aa938bd7e6
+    INFO: Writing virsh shellscript: ./install_scripts/install-hobags.sh
+    INFO: Wrote ./install_scripts/install-hobags.sh
+    INFO: Choosing random hypervisor for this vm
     INFO: Chose 192.168.20.102
     INFO: Sending script to remote target: 192.168.20.102
-    install-fuckshit.sh                                                                                                          100% 1017     1.0KB/s   00:00    
     INFO: Executing script on 192.168.20.102
-    Domain fuckshit defined from fuckshit.xml
-    
-    Domain fuckshit started
+    INFO: Successfully sent the command to define and start the VM
+    INFO: Check the API for registration/further information
 
-Then about 6 minutes later, VM: Fuckshit contacts my deployment server and says
-it's ready, and gives a few bits of information (ip, uname, etc.)
+Then about 6 minutes later, a vm called hobag contacts my deployment server and 
+says it's ready, and gives a few bits of information (ip, uname, etc.)
 
 To Do
 -----

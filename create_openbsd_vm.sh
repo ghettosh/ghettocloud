@@ -32,7 +32,7 @@ function banner(){
 }
 
 function set_random_host(){
-    echo "INFO: Choosing random destination for this host"
+    echo "INFO: Choosing random hypervisor for this vm"
     TARGET=${VALIDHYPERVISORS[$(( $RANDOM % ${#VALIDHYPERVISORS[@]} ))]}
     echo "INFO: Chose ${TARGET}"
 }
@@ -46,6 +46,7 @@ function random_hex_value(){
 }
 
 function generate_random_mac(){
+    echo "INFO: generating a MAC address"
     MAC=( '00' 'de' 'ad' )
     for i in {1..3}; do
         MAC+=( $(random_hex_value) )
@@ -68,7 +69,7 @@ function make_openbsd_answerfile(){
         return
     fi
     # Configure me - you will likely want to change this answerfile
-    echo "INFO: Writing ${FILE}"
+    echo "INFO: Writing seed file: ${FILE}"
     cat << EOT > ${FILE}
 system hostname = ${NAME}
 password for root account = ${PASSWORD}
@@ -97,7 +98,7 @@ function make_virsh_script(){
     # make sure you set the bridge properly. Otherwise you can pretty much take out the 'str' crap and change 
     # --nonetworks in the virt-install command to something you would normally use, e.g. --network bridge=br2
     INSTALL_SCRIPT="./install_scripts/install-${VM}.sh"
-    echo "INFO: Writing ${INSTALL_SCRIPT}"
+    echo "INFO: Writing virsh shellscript: ${INSTALL_SCRIPT}"
     echo "str=\"  <interface type='bridge'>\n\"                                        " > ${INSTALL_SCRIPT}    
     echo "str+=\"      <mac address='${MAC}'/>\n\"                                     " >> ${INSTALL_SCRIPT}      
     echo "str+=\"      <source bridge='br100'/>\n\"                                    " >> ${INSTALL_SCRIPT}      
@@ -124,9 +125,15 @@ function make_virsh_script(){
 function doit(){
     set_random_host
     echo "INFO: Sending script to remote target: ${TARGET}"
-    scp ${INSTALL_SCRIPT} ${TARGET}:
+    scp ${INSTALL_SCRIPT} ${TARGET}: >/dev/null 2>&1
     echo "INFO: Executing script on ${TARGET}"
-    ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT##.*/}"
+    ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT##.*/}" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "INFO: Successfully sent the command to define and start the VM"
+        echo "INFO: Check the API for registration/further information"
+    else
+        echo "FATAL: Something went wrong when trying to execute the remote script"
+    fi
 }
 
 function usage(){
