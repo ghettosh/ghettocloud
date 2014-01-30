@@ -1,0 +1,7 @@
+openbsd-mirror-*
+00:de:ad*
+install_scripts
+site-backups
+auto_install
+pxeboot
+bsd
