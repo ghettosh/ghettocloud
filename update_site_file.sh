@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
-SITE_DIRS=( 'usr/' 'var/' 'etc/' )
-DISTRIBUTIONS_TO_UPDATE=( '5.4-amd64' 'snapshots-amd64' )
-SITE_BACKUPS="./site-backups/"
+#
+# A little script to backup/generate a new siteNN.tgz file for every time you update 
+# the site.tgz sets.
+
+SITE_DIRS=( 'usr/' 'var/' 'etc/' )                         # Configure me - tar these dirs up (relative to .)
+DISTRIBUTIONS_TO_UPDATE=( '5.4-amd64' 'snapshots-amd64' )  # Configure me - Put the site file in openbsd-mirror-$here
+SITE_BACKUPS="./site-backups/"                             # Configure me - backup the old site.tgz file here     
+mkdir -p ${SITE_BACKUPS} > /dev/null 2>&1
 for DISTRIBUTION in ${DISTRIBUTIONS_TO_UPDATE[@]}; do
     echo
     if [[ ${DISTRIBUTION} =~ "snapshots" ]]; then
-        VERSION=55
+        VERSION=55                                         # Configure me - Make sure this matches -current.
     else
         VERSION=${DISTRIBUTION/-*}
         VERSION=${VERSION/\./}

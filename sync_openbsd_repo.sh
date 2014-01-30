@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Quick and ugly
+# Quick and ugly, create mirror directories of public openbsd mirrors; grep 'Configure me' in this file
+# for things you can/should change for your environment
 
 declare -A files
 declare -a flavors
@@ -11,10 +12,7 @@ if [[ "$(uname)" != "OpenBSD" ]]; then
     exit 1
 fi
 
-#CURL=`which curl` > /dev/null 2>&1 \
-#    || { echo "FATAL: You need curl to continue"; exit 1; }
 SHA256SUM=`which sha256` 
-
 arches=( amd64 )            # Configure me - Download these architectures
 flavors=( 5.4 snapshots )   # Configure me - for these versions of OpenBSD
 
@@ -48,12 +46,10 @@ for ARCH in ${arches[@]}; do
         printf "[${FLAVOR}] checking $ITEM... "
         if [[ ! -f $MIRRORDIR/${ITEM} ]]; then
           UPDATED=1
-          # ${CURL} -sq ${URL}/${ITEM} > ${MIRRORDIR}/${ITEM} && \
           ftp -Vo ${MIRRORDIR}/${ITEM} ${URL}/${ITEM} && \
             { echo "downloaded"; } || { echo "failed"; }
         else
           if [[ -f ${MIRRORDIR}/.sums ]]; then 
-            # CURRENTSUM=$( grep -E "[[:space:]]+${ITEM}$" ${MIRRORDIR}/.sums | awk '{print $1}' )
             CURRENTSUM=$( grep -E "[[:space:]]+\(${ITEM}\)[[:space:]]" ${MIRRORDIR}/.sums | awk '{print $4}' )
           else
             CURRENTSUM=$( ${SHA256SUM} ${MIRRORDIR}/${ITEM} | awk '{print $5}')
@@ -61,7 +57,6 @@ for ARCH in ${arches[@]}; do
           if [[ ${CURRENTSUM} != ${files[$ITEM]} ]]; then
             UPDATED=1
             printf "update required... "
-            # ${CURL} -sq ${URL}/${ITEM} > ${MIRRORDIR}/${ITEM}  && \
             ftp -Vo ${MIRRORDIR}/${ITEM} ${URL}/${ITEM} && \
             echo "ok"
           else
