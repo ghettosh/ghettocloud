@@ -1,11 +1,17 @@
 OpenBSD Cloud
 -------------
 
+This is a lab project. In a sentence, it's a framework I use to rapidly provis-
+ion OpenBSD virtual machines. 
+
+
+
 Pre Requisites
 --------------
 
   * 1 or more Linux boxes with libvirt,virt-install installed
-  * at least one OpenBSD machine serving as at least a DHCP server with at least 1GB of storage
+  * at least one OpenBSD machine serving as at least a DHCP server with at lea-
+    st 1GB of storage
 
 This directory represents a few things:
 
@@ -17,11 +23,41 @@ This directory represents a few things:
 Description of files
 --------------------
 
-00:b0:0b:89:a0:8c-install.conf
+My production deployment looks like this:
+
+    root@router:/data/serve # ls -l
+    total 96
+    drwxr-xr-x  8 root  wheel   512 Jan 30 12:46 .git
+    -rw-r--r--  1 root  wheel    81 Jan 30 11:07 .gitignore
+    -rw-r--r--  1 root  wheel   403 Jan 30 08:05 00:de:ad:54:52:49-install.conf
+    -rw-r--r--  1 root  wheel   403 Jan 30 08:05 00:de:ad:67:71:41-install.conf
+    -rw-r--r--  1 root  wheel   403 Jan 30 08:04 00:de:ad:76:c7:33-install.conf
+    -rw-r--r--  1 root  wheel   396 Jan 30 05:35 00:de:ad:89:a0:8c-install.conf
+    -rw-r--r--  1 root  wheel   403 Jan 30 08:05 00:de:ad:db:b4:f7-install.conf
+    -rw-r--r--  1 root  wheel  3344 Jan 30 12:54 README.md
+    lrwxr-xr-x  1 root  wheel    40 Jan 28 05:05 auto_install -> ./openbsd-mirror-snapshots-amd64/pxeboot
+    lrwxr-xr-x  1 root  wheel    39 Jan 28 04:49 bsd -> ./openbsd-mirror-snapshots-amd64/bsd.rd
+    -rwxr-xr-x  1 root  wheel  6435 Jan 30 12:04 create_openbsd_vm.sh
+    drwxr-xr-x  2 root  wheel   512 Jan 30 12:26 etc
+    -rw-r--r--  1 root  wheel   245 Jan 28 05:15 install.conf
+    drwxr-xr-x  2 root  wheel   512 Jan 30 08:05 install_scripts
+    drwxr-xr-x  2 root  wheel   512 Jan 30 06:12 openbsd-mirror-5.4-amd64
+    drwxr-xr-x  2 root  wheel  1024 Jan 30 06:35 openbsd-mirror-snapshots-amd64
+    lrwxr-xr-x  1 root  wheel    40 Jan 28 04:49 pxeboot -> ./openbsd-mirror-snapshots-amd64/pxeboot
+    drwxr-xr-x  2 root  wheel  1536 Jan 30 12:26 site-backups
+    -rwxr-xr-x  1 root  wheel  2597 Jan 30 11:28 sync_openbsd_repo.sh
+    -rwxr-xr-x  1 root  wheel  1531 Jan 30 12:26 update_site_file.sh
+    drwxr-xr-x  3 root  wheel   512 Jan 30 04:56 usr
+    drwxr-xr-x  3 root  wheel   512 Jan 30 04:54 var
+
+
+MAC-ADDRESS-install.conf
 ------------------------------
-When the OpenBSD VM boots up, autoinstaller will try to hit the next-server on port 80 and request this file.
-It contains answers to the questions you are asked in an interactive openbsd installation. This file is gene-
-rated on  the fly by create_openbsd_vm.sh.
+When the OpenBSD VM boots up, autoinstaller will try to hit the next-server on 
+port 80 and request this file. It contains answers to the questions you are as-
+ked in an interactive openbsd installation. This file is generated on  the fly
+by create_openbsd_vm.sh.
+
 
 README.md
 ---------
@@ -29,22 +65,25 @@ The readme, this file.
 
 auto_install
 ------------
-The PXE loader need to be linked/coped to this file, I forgot why, but I believe it's to differentiate betwe-
-en an auto-install and an auto-upgrade.
+The PXE loader need to be linked/coped to this file, I forgot why, but I belie-
+ve it's to differentiate between an auto-install and an auto-upgrade.
+
 
 auto_install -> ./openbsd-mirror-snapshots-amd64/pxeboot
 pxeboot -> ./openbsd-mirror-snapshots-amd64/pxeboot
 
 bsd
 ---
-The 'bsd' file is the 'kernel' that is sent by the pxe loader. It's a ramdisk containing the installation im-
-age. In my case, it's a symlink to the bsd.rd of the distribution I want to boot by default:
+The 'bsd' file is the 'kernel' that is sent by the pxe loader. It's a ramdisk 
+containing the installation image. In my case, it's a symlink to the bsd.rd of 
+the distribution I want to boot by default:
 
-bsd -> ./openbsd-mirror-snapshots-amd64/bsd.rd
+    bsd -> ./openbsd-mirror-snapshots-amd64/bsd.rd
 
 etc/ usr/ var/
 --------------
-These directories are used as both the ramdisk configuration (only /etc/boot.conf) and site configuration.
+These directories are used as both the ramdisk configuration (only /etc/boot.c-
+onf) and site configuration.
 
 install.conf
 ------------
@@ -52,17 +91,20 @@ A default install.conf, in case the auto-installer can't find <mac>-install.conf
 
 install_scripts
 ---------------
-This is where the 'build it' scripts go to. Prior to building a VM, the script to actually built it is staged
-here. Then it is scp'd over to the destination (a random host) and run. You can use this directory to rebuild
-or troubleshoot a failed build.
+This is where the 'build it' scripts go to. Prior to building a VM, the script 
+to actually built it is staged here. Then it is scp'd over to the destination 
+(a random host) and run. You can use this directory to rebuild or troubleshoot 
+a failed build.
 
 openbsd-mirror-version-arch
 ----------------
-These are the mirrored directories of public mirrors. We'll pull the install media off of these directories.
+These are the mirrored directories of public mirrors. We'll pull the install 
+media off of these directories.
 
 pxeboot
 -------
-Symlink to the particular distribution's pxeboot file. This is required to pxeboot openbsd VMs.
+Symlink to the particular distribution's pxeboot file. This is required to pxe-
+boot openbsd VMs.
 
 site-backups
 ------------
@@ -70,18 +112,20 @@ When a new site${version}.tgz file is made, the old one is backed up here.
 
 create_openbsd_vm.sh
 --------------------
-This script is the one that actually creates the VMs on the remote (randomly selected) hosts. It stages up a
-shellscript in ./install_scripts, scp's it over to the target, then runs it over there. Reliable, simple, not
-pretty, but it works. 
+This script is the one that actually creates the VMs on the remote (randomly 
+selected) hosts. It stages up a shellscript in ./install_scripts, scp's it over
+to the target, then runs it over there. Simple, not pretty, but it works. 
 
 sync_openbsd_repo.sh
 --------------------
-This script creates a series of directories called openbsd-mirror-${VERSION}-${ARCH} and contains the same 
-directories you would see on an official openbsd mirror. We need this because we don't want to rape a mirror
-every time we want to build a box. Your newly built VMs will build themselves using these files.
+This script creates a series of directories called openbsd-mirror-${VERSION}-
+${ARCH} and contains the same directories you would see on an official openbsd 
+mirror. We need this because we don't want to rape a mirror every time we want 
+to build a box. Your newly built VMs will build themselves using these files.
+
 
 update_site_file.sh
 -------------------
-Creates a new site${version}.tgz file, and backs up the old one to ./site-backups. The script also ensures the
-index.txt is up-to-date. The site${version}.tgz file goes with the rest of the distribution sets.
-
+Creates a new site${version}.tgz file, and backs up the old one to ./site-back-
+ups. The script also ensures the index.txt is up-to-date. The site${version}.tgz 
+file goes with the rest of the distribution sets.
