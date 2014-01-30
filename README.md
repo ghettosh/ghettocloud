@@ -53,6 +53,29 @@ This directory represents a few things:
   * A place to run your vm creation scripts from
   * This directory must be available from http as well
 
+Quickstart
+----------
+
+lol. Not so quick.
+
+  - Make a Linux box, install KVM, libvirt and virt-install on it
+  - Make an OpenBSD box, 
+   - make it a DHCP server and 
+   - clone this repository into the webroot
+   - configure and run ''sync_openbsd_repo.sh'', 
+   - Configure tftpd to serve from this directory
+   - symlink the wanted pxeboot for the release you just mirrored here. e.g.:
+     ''ln -s ./openbsd-mirrors-snapshots-amd64/pxeboot ./auto_install''
+   - symlink the wanted bsd.rd for the release you just mirrored here. e.g.:
+     ''ln -s ./openbsd-mirrors-snapshots-amd64/bsd.rd ./bsd''
+   - Edit the site files in usr/, etc/, and var/ to your liking.
+   - Edit and run the ''update_site_file.sh'' script
+   - Edit (closely, pay attention to everything down to the libvirt storage pool
+     I used; it will likely be different than what you have) the ''create_openbsd_vm.sh'' script
+   - Create a keypair, put the public key in root's authorized_keys on the linux box
+
+
+
 Description of files
 --------------------
 
