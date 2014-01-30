@@ -6,19 +6,18 @@ Pre Requisites
 
   * 1 or more Linux boxes with libvirt,virt-install installed
   * at least one OpenBSD machine serving as at least a DHCP server with at least 1GB of storage
-  * 
-  
 
 This directory represents a few things:
 
   * the tftpboot directory hosted from a next-server
   * The webroot hosted from that same next-server
   * A place to run your vm creation scripts from
+  * This directory must be available from http as well
 
 Description of files
 --------------------
 
-00:de:ad:89:a0:8c-install.conf
+00:b0:0b:89:a0:8c-install.conf
 ------------------------------
 When the OpenBSD VM boots up, autoinstaller will try to hit the next-server on port 80 and request this file.
 It contains answers to the questions you are asked in an interactive openbsd installation. This file is gene-

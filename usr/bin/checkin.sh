@@ -3,7 +3,9 @@
 MYNAME="$(uname -n | cut -d. -f1)"
 MYUNAME="$(uname -a | tr ' ' ',')"
 MYIPS=
-ROADSIGN=http://ghetto.sh/roadsign.txt
+ROADSIGN=http://ghetto.sh/roadsign.txt  # Location of a file that tells this script where the API head is.
+                                        # This is specific to my environment, you can probably just remove this file in your
+                                        # environment.
 
 # populate MYIPS
 for IP in $(ifconfig -a | awk '/inet /{print $2}'); do
