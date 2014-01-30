@@ -4,7 +4,41 @@ OpenBSD Cloud
 This is a lab project. In a sentence, it's a framework I use to rapidly provis-
 ion OpenBSD virtual machines. 
 
+It provides me with the ability to do the following:
 
+    root@router:/data/serve # ./create_openbsd_vm.sh fuckshit
+    
+    ********************************************************************************
+    OpenBSD VM Creator
+    ********************************************************************************
+    INFO: Chose 00:de:ad:d4:18:dd
+    INFO: Writing ./00:de:ad:d4:18:dd-install.conf
+    INFO: Wrote ./00:de:ad:d4:18:dd-install.conf
+    INFO: Root password will be:  6c7e2a05fac5
+    INFO: Writing ./install_scripts/install-fuckshit.sh
+    INFO: Wrote ./install_scripts/install-fuckshit.sh
+    INFO: Choosing random destination for this host
+    INFO: Chose 192.168.20.102
+    INFO: Sending script to remote target: 192.168.20.102
+    install-fuckshit.sh                                                                                                          100% 1017     1.0KB/s   00:00    
+    INFO: Executing script on 192.168.20.102
+    Domain fuckshit defined from fuckshit.xml
+    
+    Domain fuckshit started
+
+Then about 6 minutes later, VM: Fuckshit contacts my deployment server and says
+it's ready, and gives a few bits of information (ip, uname, etc.)
+
+To Do
+-----
+
+  - Write a proper REST API to handle incoming 'registrations' 
+  - implement "firstrun" capabilities into the 'checkin.sh' script for install-
+    ing packages/ports/other post-install configurations
+  - add some getopt funcitonality to allow for customizatoin of the virt-install
+    command
+  - Expand checkin.sh to send a lot more data
+  - Integrate configuration management into the mix
 
 Pre Requisites
 --------------
