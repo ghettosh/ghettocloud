@@ -2,7 +2,7 @@
 
 export TERM=xterm
 if [[ "$(uname)" != "OpenBSD" ]]; then
-    echo "Sorry, this script is only meant to run on OpenBSD."
+    echo "This script is only meant to run on OpenBSD."
     exit 1
 fi
 
@@ -13,8 +13,10 @@ function banner(){
     echo "********************************************************************************"
 }
 
-function random_host(){
-    echo ${VALIDHYPERVISORS[$(( $RANDOM % ${#VALIDHYPERVISORS[@]} ))]}
+function set_random_host(){
+    echo "INFO: Choosing random destination for this host"
+    TARGET=${VALIDHYPERVISORS[$(( $RANDOM % ${#VALIDHYPERVISORS[@]} ))]}
+    echo "INFO: Chose ${TARGET}"
 }
 
 function random_hex_value(){
@@ -67,8 +69,8 @@ EOT
 }
 
 function make_virsh_script(){
-    MAC=$1
-    VM=$2
+    MAC=${1}
+    VM=${2}
     INSTALL_SCRIPT="./install_scripts/install-${VM}.sh"
     echo "INFO: Writing ${INSTALL_SCRIPT}"
     echo "str=\"  <interface type='bridge'>\n\"                                        " > ${INSTALL_SCRIPT}    
@@ -95,13 +97,9 @@ function make_virsh_script(){
 }
 
 function doit(){
-    echo "INFO: Choosing random destination for this host"
-    TARGET="$(random_host)"
-    echo "INFO: Chose ${TARGET}"
-    
+    set_random_host
     echo "INFO: Sending script to remote target: ${TARGET}"
     scp ${INSTALL_SCRIPT} ${TARGET}:
-    
     echo "INFO: Executing script on ${TARGET}"
     ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT##.*/}"
 }
