@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Quick and ugly, create mirror directories of public openbsd mirrors; grep 'Configure me' in this file
+# Quick and ugly, create mirror directories of public openbsd mirrors; 
+# grep 'Configure me' in this file
 # for things you can/should change for your environment
 
 declare -A files
