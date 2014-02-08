@@ -69,6 +69,8 @@ for ARCH in ${arches[@]}; do
       if [[ ${UPDATED} -eq 1 ]]; then
         printf "[+] something was updated - generating new sums... "
         ( cd $MIRRORDIR && { ${SHA256SUM} * > .sums && { echo "ok"; } || { echo "failed"; } } )
+        printf "[+] something was updated - Updating index.txt "
+        ( cd $MIRRORDIR && { ls -l > index.txt && { echo "ok"; } || { echo "failed"; } } )
       fi
     done
 done

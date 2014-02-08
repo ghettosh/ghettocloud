@@ -5,6 +5,7 @@
 SHELL=/bin/sh
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 HOME=/var/log
+MAILTO=""
 #
 #minute hour    mday    month   wday    command
 #
