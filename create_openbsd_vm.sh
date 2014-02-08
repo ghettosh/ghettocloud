@@ -18,7 +18,7 @@
 #     Send the mentioned shellscript to a remote host and run it.
 #
 
-export TERM=xterm
+export TERM=vt100 # everyone should have this termdef.
 if [[ "$(uname)" != "OpenBSD" ]]; then
     echo "This script is only meant to run on OpenBSD."
     exit 1
@@ -27,7 +27,9 @@ fi
 function banner(){
     echo
     echo "********************************************************************************"
+    echo
     echo "OpenBSD VM Creator"
+    echo
     echo "********************************************************************************"
 }
 
@@ -99,14 +101,14 @@ function make_virsh_script(){
     # --nonetworks in the virt-install command to something you would normally use, e.g. --network bridge=br2
     INSTALL_SCRIPT="./install_scripts/install-${VM}.sh"
     echo "INFO: Writing virsh shellscript: ${INSTALL_SCRIPT}"
-    echo "str=\"  <interface type='bridge'>\n\"                                        " > ${INSTALL_SCRIPT}    
-    echo "str+=\"      <mac address='${MAC}'/>\n\"                                     " >> ${INSTALL_SCRIPT}      
-    echo "str+=\"      <source bridge='br100'/>\n\"                                    " >> ${INSTALL_SCRIPT}      
-    echo "str+=\"      <virtualport type='openvswitch'>\n\"                            " >> ${INSTALL_SCRIPT}          
-    echo "str+=\"      </virtualport>\n\"                                              " >> ${INSTALL_SCRIPT}  
-    echo "str+=\"      <model type='virtio'/>\n\"                                      " >> ${INSTALL_SCRIPT}      
-    echo "str+=\"    </interface>\n\"                                                  " >> ${INSTALL_SCRIPT} 
-    echo "str+=\"  </devices>\"                                                        " >> ${INSTALL_SCRIPT}
+    echo "str=\"  <interface type='bridge'>\n\"          " > ${INSTALL_SCRIPT}    
+    echo "str+=\"   <mac address='${MAC}'/>\n\"         " >> ${INSTALL_SCRIPT}      
+    echo "str+=\"   <source bridge='br100'/>\n\"        " >> ${INSTALL_SCRIPT}      
+    echo "str+=\"   <virtualport type='openvswitch'>\n\"" >> ${INSTALL_SCRIPT}          
+    echo "str+=\"   </virtualport>\n\"                  " >> ${INSTALL_SCRIPT}  
+    echo "str+=\"   <model type='virtio'/>\n\"          " >> ${INSTALL_SCRIPT}      
+    echo "str+=\"  </interface>\n\"                     " >> ${INSTALL_SCRIPT} 
+    echo "str+=\"  </devices>\"                         " >> ${INSTALL_SCRIPT}
     echo "virt-install --connect qemu:///system \
     --virt-type kvm \
     --name ${VM} \
@@ -117,8 +119,9 @@ function make_virsh_script(){
     --boot hd \
     --print-xml \
     --os-type unix \
-    --os-variant openbsd4 | sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml              " >> ${INSTALL_SCRIPT}
-    echo "virsh define ${VM}.xml && virsh start ${VM}                                  " >> ${INSTALL_SCRIPT}
+    --os-variant openbsd4 | \
+    sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml      " >> ${INSTALL_SCRIPT}
+    echo "virsh define ${VM}.xml && virsh start ${VM}  " >> ${INSTALL_SCRIPT}
     echo "INFO: Wrote ${INSTALL_SCRIPT}"
 }
 
@@ -132,7 +135,7 @@ function doit(){
         echo "INFO: Successfully sent the command to define and start the VM"
         echo "INFO: Check the API for registration/further information"
     else
-        echo "FATAL: Something went wrong when trying to execute the remote script"
+        echo "FATAL: Failure when trying to execute the remote script"
     fi
 }
 
@@ -162,10 +165,14 @@ function usage(){
 
 function log_step(){
     STEP=${1}
-    STEP="$(echo $STEP | tr ' ' '+')"           # Sanitize
+    STEP="$(echo $STEP | tr ' ' '+')"             # Sanitize
     STEP="$(echo $STEP | tr -dc 'a-zA-Z0-9-+.' )" # Sanitize
-    URL="http://$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)/buildlog/name=${VM}&start=$(date +%s)&step=${STEP}"
-    ftp -Vo- -r5 ${URL} > /dev/null 2>&1
+    TARGET=$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)
+    if [ ! -z ${TARGET} ]; then
+        API_CALL="buildlog/name=${VM}&start=$(date +%s)&step=${STEP}"
+        URL="http://${TARGET}/${API_CALL}"
+        ftp -Vo- -r5 ${URL} > /dev/null 2>&1
+    fi
 }
 
 #
