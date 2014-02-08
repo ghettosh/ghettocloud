@@ -29,6 +29,10 @@ fi
 if [ -z ${MYUNAME} ]; then
     MYUNAME=NULL
 fi
-URL="http://$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)/name=${MYNAME}&ips=${MYIPS}&uname=${MYUNAME}"
-echo "hitting $URL"
-ftp -Vo- -r 2 ${URL}
+
+API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
+if [[ ! -z ${API_SERVER} ]]; then}
+    URL="http://${API_SERVER}/name=${MYNAME}&ips=${MYIPS}&uname=${MYUNAME}"
+    echo "hitting $URL"
+    ftp -Vo- -r 2 ${URL}
+fi

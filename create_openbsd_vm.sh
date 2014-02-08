@@ -180,7 +180,7 @@ else
     VM=$1
 fi
 
-VALIDHYPERVISORS=( 192.168.20.102 192.168.20.103 )
+VALIDHYPERVISORS=( 192.168.20.102 192.168.20.104 192.168.20.105 )
 ROADSIGN="http://ghetto.sh/roadsign.txt"
 
 banner
