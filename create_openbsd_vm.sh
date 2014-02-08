@@ -18,25 +18,30 @@
 #     Send the mentioned shellscript to a remote host and run it.
 #
 
-export TERM=vt100 # everyone should have this termdef.
+function print_blue(){ printf "$(tput setf 1)$@$(tput sgr0)"; }
+function print_green(){ printf "$(tput setf 2)$@$(tput sgr0)"; }
+function print_blue(){ printf "$(tput setf 3)$@$(tput sgr0)"; }
+function print_red(){ printf "$(tput setf 4)$@$(tput sgr0)"; }
+function print_pink(){ printf "$(tput setf 5)$@$(tput sgr0)"; }
+function print_yellow(){ printf "$(tput setf 6)$@$(tput sgr0)"; }
+function print_white(){ printf "$(tput setf 7)$@$(tput sgr0)"; }
+
+export TERM=xterm # everyone should have this termdef.
 if [[ "$(uname)" != "OpenBSD" ]]; then
-    echo "This script is only meant to run on OpenBSD."
+    print_red "FATAL: This script is only meant to run on OpenBSD\n"
     exit 1
 fi
 
 function banner(){
-    echo
-    echo "********************************************************************************"
-    echo
-    echo "OpenBSD VM Creator"
-    echo
-    echo "********************************************************************************"
+    print_yellow "\n\n********************************************************************************\n"
+    print_white "OpenBSD VM Creator\n"
+    print_yellow "********************************************************************************\n\n"
 }
 
 function set_random_host(){
-    echo "INFO: Choosing random hypervisor for this vm"
+    print_blue "INFO: Choosing random hypervisor for this vm..."
     TARGET=${VALIDHYPERVISORS[$(( $RANDOM % ${#VALIDHYPERVISORS[@]} ))]}
-    echo "INFO: Chose ${TARGET}"
+    echo "chose ${TARGET}"
 }
 
 function random_hex_value(){
@@ -48,14 +53,14 @@ function random_hex_value(){
 }
 
 function generate_random_mac(){
-    echo "INFO: generating a MAC address"
+    print_blue "INFO: generating a MAC address..."
     MAC=( '00' 'de' 'ad' )
     for i in {1..3}; do
         MAC+=( $(random_hex_value) )
     done
     MAC=$( echo ${MAC[@]} | tr ' ' ':' )
     MAC=$( echo ${MAC} | tr 'A-Z' 'a-z' )
-    echo "INFO: Chose ${MAC}"
+    echo "chose ${MAC}"
 }
 
 
@@ -65,13 +70,12 @@ function make_openbsd_answerfile(){
     FILE=./${MAC}-install.conf
     PASSWORD=$(date +%s | md5 | cut -c -12)
     if [ ! -z $ANSWER_FILE ]; then
-        echo "INFO: Detected user-specified answer file. using that"
-        echo "INFO: cp ${ANSWER_FILE} ${FILE}"
+        print_yellow "INFO: Detected user-specified answer file. using that\n"
         cp ${ANSWER_FILE} ${FILE} 
         return
     fi
-    # Configure me - you will likely want to change this answerfile
-    echo "INFO: Writing seed file: ${FILE}"
+    # Configure me - you will likely want to change this answerfile template
+    print_blue "INFO: Writing seed file: ${FILE}..."
     cat << EOT > ${FILE}
 system hostname = ${NAME}
 password for root account = ${PASSWORD}
@@ -87,8 +91,8 @@ Set name(s)? = site55.tgz
 Install sets anyway? = yes
 Directory does not contain SHA256.sig. Continue without verification? = yes
 EOT
-    echo "INFO: Wrote ${FILE}"
-    echo "INFO: Root password will be: $(grep ^password ${FILE} | cut -d= -f2)"
+    echo "wrote ${FILE}"
+    print_pink "INFO: Root password will be: $(grep ^password ${FILE} | cut -d= -f2)\n"
 }
 
 function make_virsh_script(){
@@ -101,7 +105,7 @@ function make_virsh_script(){
     # make sure you set the bridge properly. Otherwise you can pretty much take out the 'str' crap and change 
     # --nonetworks in the virt-install command to something you would normally use, e.g. --network bridge=br2
     INSTALL_SCRIPT="./install_scripts/install-${VM}.sh"
-    echo "INFO: Writing virsh shellscript: ${INSTALL_SCRIPT}"
+    print_blue "INFO: Writing virsh shellscript: ${INSTALL_SCRIPT}..."
     echo "str=\"  <interface type='bridge'>\n\"          " > ${INSTALL_SCRIPT}    
     echo "str+=\"   <mac address='${MAC}'/>\n\"         " >> ${INSTALL_SCRIPT}      
     echo "str+=\"   <source bridge='br100'/>\n\"        " >> ${INSTALL_SCRIPT}      
@@ -122,44 +126,40 @@ function make_virsh_script(){
     --os-type unix \
     --os-variant openbsd4 | sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml      " >> ${INSTALL_SCRIPT}
     echo "virsh define ${VM}.xml && virsh start ${VM}  " >> ${INSTALL_SCRIPT}
-    echo "INFO: Wrote ${INSTALL_SCRIPT}"
+    echo "wrote ${INSTALL_SCRIPT}"
 }
 
 function doit(){
     set_random_host
-    echo "INFO: Sending script to remote target: ${TARGET}"
+    print_blue "INFO: Sending script to remote target: ${TARGET}..."
     scp ${INSTALL_SCRIPT} ${TARGET}: >/dev/null 2>&1
-    echo "INFO: Executing script on ${TARGET}"
+    if [[ $? -eq 0 ]]; then
+        echo "ok"
+    else
+        echo "failed"
+        exit 1
+    fi
+    print_blue "INFO: Executing script on ${TARGET}..."
     ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT##.*/}" >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        echo "INFO: Successfully sent the command to define and start the VM"
-        echo "INFO: Check the API for registration/further information"
+        echo "success"
+        print_white "INFO: Check the API for registration/further information\n"
     else
-        echo "FATAL: Failure when trying to execute the remote script"
+        print_red "FATAL: Failure when trying to execute the remote script\n"
     fi
 }
 
 function usage(){
-    # 0200 coding, deal with it!
     banner
-    echo
-    tput setf 4
-    echo "Usage: [ANSWER_FILE=/path/to/my/file] $0 <vm name>"
-    tput sgr0
-    tput setf 6
-    echo
-    echo "Examples:"
-    echo
-    tput setf 5
-    echo "  create a vm called hippo using an auto-generated answerfile:"
-    tput sgr0
-    echo "  $0 hippo"
-    echo
-    tput setf 5
-    echo "  Create a vm called doge using a specified answer file:"
-    tput sgr0
-    echo "  ANSWER_FILE=/home/me/answerfiles/doge.conf $0 doge"
-    echo
+    print_red "Usage\n"
+    print_red "-----\n"
+    print_red " [ANSWER_FILE=/path/to/my/file] $0 <vm name>\n"
+    print_white "\nExamples\n"
+    print_white "--------\n"
+    print_white "  create a vm called hippo using an auto-generated answerfile:\n"
+    print_yellow "  $0 hippo\n\n"
+    print_white "  Create a vm called doge using a specified answer file:\n"
+    print_yellow "  ANSWER_FILE=/home/me/answerfiles/doge.conf $0 doge\n\n"
     exit 1
 }
 

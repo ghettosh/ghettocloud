@@ -6,23 +6,20 @@ ion OpenBSD virtual machines.
 
 It provides me with the ability to do the following:
 
-    root@router:/data/serve # ./create_openbsd_vm.sh hobags
+    root@dnpcor4rtr00:/data/serve # ./create_openbsd_vm.sh ABCDEFGH
+    
     
     ********************************************************************************
     OpenBSD VM Creator
     ********************************************************************************
-    INFO: generating a MAC address
-    INFO: Chose 00:de:ad:2d:7a:93
-    INFO: Writing seed file: ./00:de:ad:2d:7a:93-install.conf
-    INFO: Wrote ./00:de:ad:2d:7a:93-install.conf
-    INFO: Root password will be:  a9aa938bd7e6
-    INFO: Writing virsh shellscript: ./install_scripts/install-hobags.sh
-    INFO: Wrote ./install_scripts/install-hobags.sh
-    INFO: Choosing random hypervisor for this vm
-    INFO: Chose 192.168.20.102
-    INFO: Sending script to remote target: 192.168.20.102
-    INFO: Executing script on 192.168.20.102
-    INFO: Successfully sent the command to define and start the VM
+    
+    INFO: generating a MAC address...chose 00:de:ad:c5:77:bd
+    INFO: Writing seed file: ./00:de:ad:c5:77:bd-install.conf...wrote ./00:de:ad:c5:77:bd-install.conf
+    INFO: Root password will be:  f047ea35f1a8
+    INFO: Writing virsh shellscript: ./install_scripts/install-ABCDEFGH.sh...wrote ./install_scripts/install-ABCDEFGH.sh
+    INFO: Choosing random hypervisor for this vm...chose 192.168.20.105
+    INFO: Sending script to remote target: 192.168.20.105...ok
+    INFO: Executing script on 192.168.20.105...success
     INFO: Check the API for registration/further information
 
 Then about 6 minutes later, a vm called hobag contacts my deployment server and 
@@ -112,7 +109,7 @@ MAC-ADDRESS-install.conf
 When the OpenBSD VM boots up, autoinstaller will try to hit the next-server on 
 port 80 and request this file. It contains answers to the questions you are as-
 ked in an interactive openbsd installation. This file is generated on  the fly
-by create_openbsd_vm.sh.
+by create_openbsd_vm.sh and can be removed/moved after the script completes.
 
 
 README.md
