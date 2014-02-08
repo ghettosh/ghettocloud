@@ -85,6 +85,7 @@ server? = 192.168.10.1
 server directory? = openbsd-mirror-snapshots-amd64/
 Set name(s)? = site55.tgz
 Install sets anyway? = yes
+Directory does not contain SHA256.sig. Continue without verification? = yes
 EOT
     echo "INFO: Wrote ${FILE}"
     echo "INFO: Root password will be: $(grep ^password ${FILE} | cut -d= -f2)"
@@ -119,8 +120,7 @@ function make_virsh_script(){
     --boot hd \
     --print-xml \
     --os-type unix \
-    --os-variant openbsd4 | \
-    sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml      " >> ${INSTALL_SCRIPT}
+    --os-variant openbsd4 | sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml      " >> ${INSTALL_SCRIPT}
     echo "virsh define ${VM}.xml && virsh start ${VM}  " >> ${INSTALL_SCRIPT}
     echo "INFO: Wrote ${INSTALL_SCRIPT}"
 }
