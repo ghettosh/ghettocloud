@@ -41,20 +41,21 @@ fi
 
 API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
 
-# Check for an update to the site55.tgz; be very careful!!!
+# Check for an update to the siteNN.tgz; be very careful!!!
 if [[ ! -z ${API_SERVER} ]]; then
     MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
-    REMOTESUM=$(ftp -Vo- -r 5 ${API_SERVER}/siteupdate 2>/dev/null | tr -d ' ')
+    REMOTESUM=$(ftp -Vo- -r 5 ${API_SERVER}/static/sitesum 2>/dev/null | tr -d ' ')
     if [ -z ${REMOTESUM} ]; then
         echo "FATAL: Could not get remote sum. Not going to check in"
         exit 1
     else
         if [[ ${REMOTESUM} != ${MYSUM} ]] ;then
             UPDATE_REQUIRED=1
+            RELEASE=$(uname -r | tr -d '.')
             cd /tmp
-            ftp -V ${API_SERVER}/site-current.tgz 2>/dev/null
-            if [ -f /tmp/site-current.tgz ]; then
-                tar -zxvf /tmp/site-current.tgz -C /
+            ftp -V ${API_SERVER}/static/site${RELEASE}.tgz 2>/dev/null
+            if [ -f /tmp/site${RELEASE}.tgz ]; then
+                tar -zxvf /tmp/site${RELEASE}.tgz -C /
             else
                 echo "FATAL: File was not downloaded properly"
                 exit 1
