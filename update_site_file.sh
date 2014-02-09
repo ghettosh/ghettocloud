@@ -6,6 +6,25 @@
 SITE_DIRS=( 'usr/' 'var/' 'etc/' )                         # Configure me - tar these dirs up (relative to .)
 DISTRIBUTIONS_TO_UPDATE=( '5.4-amd64' 'snapshots-amd64' )  # Configure me - Put the site file in openbsd-mirror-$here
 SITE_BACKUPS="./site-backups/"                             # Configure me - backup the old site.tgz file here     
+
+echo "INFO: Updating API deployment box"
+API_HEAD=$(ftp -Vo- -r5 http://ghetto.sh/roadsign.txt 2>/dev/null | \
+            cut -d: -f1)
+API_SSHPORT='20480'
+API_SSHUSER='root'
+SCP_OPTIONS=" -P${API_SSHPORT} -l${API_SSHUSER} "
+SSH_OPTIONS=" -p${API_SSHPORT} -l${API_SSHUSER} "
+API_REMOTE_DST="/home/apiadmin/ghettosh-flask-api/api/datastore/sitesum"
+CHECKIN_MD5=$(md5 usr/bin/checkin.sh | cut -d= -f2 | tr -d ' ')
+REMOTESUM=$(ssh ${SSH_OPTIONS} ${API_HEAD} cat ${API_REMOTE_DST}) 
+if [[ ${CHECKIN_MD5} != ${REMOTESUM} ]]; then
+    CMD="ssh ${SSH_OPTIONS} ${API_HEAD} echo ${CHECKIN_MD5} > ${API_REMOTE_DST}"
+    echo "INFO: Running $CMD"                                                   
+    $CMD && { echo "INFO: Success"; } || { echo "INFO: Failed"; }               
+else
+    echo "INFO: Up-to-date"
+fi
+
 mkdir -p ${SITE_BACKUPS} > /dev/null 2>&1
 for DISTRIBUTION in ${DISTRIBUTIONS_TO_UPDATE[@]}; do
     echo

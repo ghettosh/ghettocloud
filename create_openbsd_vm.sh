@@ -44,6 +44,34 @@ function set_random_host(){
     echo "chose ${TARGET}"
 }
 
+function set_least_busy_host(){
+    TEMPFILE=`mktemp`
+    print_blue "INFO: Choosing the least loaded hypervisor for this vm..."
+    TARGET=
+    for HYPERVISOR in ${VALIDHYPERVISORS[@]}; do
+        VMCOUNT="$(ssh ${HYPERVISOR} virsh list | egrep 'running' | wc -l)"
+        if [ -z ${VMCOUNT} ]; then
+            VMCOUNT=NULL
+        fi
+        echo "${HYPERVISOR} ${VMCOUNT}" >> $TEMPFILE
+    done
+    grep NULL $TEMPFILE > /dev/null 2>&1
+    if [[ $? -eq 0 ]]; then
+        print_yellow "WARN: One or more hypervisor didn't report a vm count\n"
+    fi
+    TARGET="$(sort -nrk2 $TEMPFILE | tail -1 | awk '{print $1}')"
+    if [ -z ${TARGET} ]; then
+        print_red "FATAL: Could not determine a hypervisor for the vm on\n"
+        print_red "DEBUG: Output of the temp file"
+        cat $TEMPFILE | while read L; do
+            print_red "$L"
+        done
+        exit 1
+    fi
+    echo "chose ${TARGET}"
+    rm -f $TEMPFILE
+}
+
 function random_hex_value(){
     RANDOMHEX=$(printf "%X\n" $(( $RANDOM % 239 + 16)))
     if [[ ${#RANDOMHEX} -lt 1 ]]; then
@@ -130,7 +158,8 @@ function make_virsh_script(){
 }
 
 function doit(){
-    set_random_host
+    # set_random_host
+    set_least_busy_host
     print_blue "INFO: Sending script to remote target: ${TARGET}..."
     scp ${INSTALL_SCRIPT} ${TARGET}: >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
@@ -190,8 +219,8 @@ else
     VM=$1
 fi
 
-VALIDHYPERVISORS=( 192.168.20.105 )
-# VALIDHYPERVISORS=( 192.168.20.10{2,3,4,5} )
+# VALIDHYPERVISORS=( 192.168.20.105 )
+VALIDHYPERVISORS=( 192.168.20.10{2,3,4,5} )
 ROADSIGN="http://ghetto.sh/roadsign.txt"
 
 banner
