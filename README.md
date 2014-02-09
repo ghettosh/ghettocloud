@@ -22,7 +22,7 @@ It provides me with the ability to do the following:
     INFO: Executing script on 192.168.20.105...success
     INFO: Check the API for registration/further information
 
-Then about 6 minutes later, a vm called hobag contacts my deployment server and 
+Then about 6 minutes later, a the VM created above contacts the REST API and 
 says it's ready, and gives a few bits of information (ip, uname, etc.)
 
 To Do

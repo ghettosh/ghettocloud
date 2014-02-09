@@ -126,7 +126,7 @@ function make_virsh_script(){
     --os-type unix \
     --os-variant openbsd4 | sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml      " >> ${INSTALL_SCRIPT}
     echo "virsh define ${VM}.xml && virsh start ${VM}  " >> ${INSTALL_SCRIPT}
-    echo "wrote ${INSTALL_SCRIPT}"
+    echo "ok"
 }
 
 function doit(){
@@ -164,15 +164,18 @@ function usage(){
 }
 
 function log_step(){
-    STEP=${1}
-    STEP="$(echo $STEP | tr ' ' '+')"             # Sanitize
-    STEP="$(echo $STEP | tr -dc 'a-zA-Z0-9-+.' )" # Sanitize
-    TARGET=$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)
-    if [ ! -z ${TARGET} ]; then
-        API_CALL="buildlog/name=${VM}&start=$(date +%s)&step=${STEP}"
-        URL="http://${TARGET}/${API_CALL}"
-        ftp -Vo- -r5 ${URL} > /dev/null 2>&1
-    fi
+    STEP=${1}                                                                   
+    STEP="$(echo $STEP | tr ' ' '+')"             # Sanitize                    
+    STEP="$(echo $STEP | tr -dc 'a-zA-Z0-9-+.' )" # Sanitize                    
+    TARGET=$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)                             
+    if [ ! -z ${TARGET} ]; then                                                 
+        API_CALL="buildlog/${VM}/$(date +%s)/${STEP}"                           
+        URL="http://${TARGET}/${API_CALL}"                                      
+        OUTPUT=$(ftp -Vo- -r5 ${URL} 2>/dev/null)                               
+        if [[ -z ${OUTPUT} ]]; then                                             
+            print_red "FATAL: Failed to log to build API on step: $STEP\n" 
+        fi                                                                      
+    fi                                                                          
 }
 
 #
@@ -187,7 +190,8 @@ else
     VM=$1
 fi
 
-VALIDHYPERVISORS=( 192.168.20.102 192.168.20.104 192.168.20.105 )
+VALIDHYPERVISORS=( 192.168.20.105 )
+# VALIDHYPERVISORS=( 192.168.20.10{2,3,4,5} )
 ROADSIGN="http://ghetto.sh/roadsign.txt"
 
 banner
