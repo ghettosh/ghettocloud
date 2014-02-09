@@ -20,7 +20,7 @@ ROADSIGN=http://ghetto.sh/roadsign.txt # Location of a file that tells this
 #    awk '{print $1, $4}' | tr '\n' ',' | sed -e 's/,$//g;s/ /:/g';)
 
 MYIPS=$(netstat -ni | \
-        egrep -v "::|127.0.0.1|^Name|lo0|enc0" | \
+        egrep -v "::|127.0.0.1|^Name|lo0|enc|pflog" | \
         awk '{print $1, $4}' | \
         tr '\n' ',' | \
         sed -e 's/,$//g;s/ /:/g';)
@@ -44,7 +44,7 @@ API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
 # Check for an update to the siteNN.tgz; be very careful!!!
 if [[ ! -z ${API_SERVER} ]]; then
     MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
-    REMOTESUM=$(ftp -Vo- -r 5 ${API_SERVER}/static/sitesum 2>/dev/null | tr -d ' ')
+    REMOTESUM=$(ftp -Vo- -r 5 http://${API_SERVER}/static/sitesum 2>/dev/null | tr -d ' ')
     if [ -z ${REMOTESUM} ]; then
         echo "FATAL: Could not get remote sum. Not going to check in"
         exit 1
@@ -53,7 +53,7 @@ if [[ ! -z ${API_SERVER} ]]; then
             UPDATE_REQUIRED=1
             RELEASE=$(uname -r | tr -d '.')
             cd /tmp
-            ftp -V ${API_SERVER}/static/site${RELEASE}.tgz 2>/dev/null
+            ftp -V http://${API_SERVER}/static/site${RELEASE}.tgz 2>/dev/null
             if [ -f /tmp/site${RELEASE}.tgz ]; then
                 tar -zxvf /tmp/site${RELEASE}.tgz -C /
             else
