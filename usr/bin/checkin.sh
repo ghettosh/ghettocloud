@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-function ensure_package(){
+function ensure_package {
     PKG=$1
     if ! pkg_info -Qa | grep ${PKG} > /dev/null 2>&1; then
         . /root/.profile && pkg_add -r ${PKG}
@@ -20,7 +20,12 @@ if [ ! -f /root/.ssh/authorized_keys ]; then
 fi
 
 if ! grep PKG_PATH /root/.profile > /dev/null 2>&1; then
-    PKG_PATH="http://openbsd.mirrorcatalogs.com/`uname -r`/packages/`uname -m`"
+    if [ $(uname -r) == "5.5" ]; then
+        RELEASE=snapshots
+    else
+        RELEASE=`uname -r`
+    fi
+    PKG_PATH="http://openbsd.mirrorcatalogs.com/${RELEASE}/packages/`uname -m`"
     echo "PKG_PATH=${PKG_PATH}" >> /root/.profile
 fi
 
