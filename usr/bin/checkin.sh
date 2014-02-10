@@ -1,23 +1,28 @@
 #!/usr/bin/env sh
 
+function ensure_package(){
+    PKG=$1
+    if ! pkg_info -Qa | grep ${PKG} > /dev/null 2>&1; then
+        . /root/.profile && pkg_add -r ${PKG}
+    fi
+}
 
 MYNAME="$(uname -n | cut -d. -f1)"
 MYUNAME="$(uname -a | tr ' ' ',')"
 MYIPS=
 ROADSIGN=http://ghetto.sh/roadsign.txt # Location of a file that tells this 
                                        # script where the API head is.
-# populate a list of IPs, in case the VM has multiple interfaces
-# We don't have array capabilities here because ksh.
-#for IP in $(ifconfig -a | awk '/inet /{print $2}'); do
-#    if [[ $IP == "127.0.0.1" ]]; then
-#        continue
-#    else
-#        MYIPS="${MYIPS} $IP"
-#    fi
-#done
-#MYIPS=$(netstat -ni | \
-#    egrep -v "<Link>|::|127.0.0.1|^Name" | \
-#    awk '{print $1, $4}' | tr '\n' ',' | sed -e 's/,$//g;s/ /:/g';)
+
+if [ ! -f /root/.ssh/authorized_keys ]; then
+    mkdir -p /root/.ssh > /dev/null 2>&1
+    echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5JWrV003FzR+5B4kOY3csxgtMHqX4YU8Q21MDhBAZcgLsK0nM00Tlv1qvifeUxvffmYm9eFCcJa0pFq8P239vQiFzUc8IQn03+HKZkovDHIhRbHt/ljoBiRfoCWxq44iXwuj1hGxvX5Q5aNPkskHoD8S/IQN2Gup65N/lumh8dosdi5nPtdldpoAkQBGcnUHt0sX42ZchvE0YaoM7NfPmOrysEeSzsUFDf2C3Ix+SP89lRAU9uD2dOfSTnDG6bT0yzHIw7WwSytRx5Ry9CvXaAwgCzPL55dlfdScScAJfOSBKO5hh3W7sKN9huV6esDt8z7qYsUIidvErZIoTHNkr gonzalen@yaaarrrr.local" >> /root/.ssh/authorized_keys
+    chmod 600 /root/.ssh/authorized_keys
+fi
+
+if ! grep PKG_PATH /root/.profile > /dev/null 2>&1; then
+    PKG_PATH="http://openbsd.mirrorcatalogs.com/`uname -r`/packages/`uname -m`"
+    echo "PKG_PATH=${PKG_PATH}" >> /root/.profile
+fi
 
 MYIPS=$(netstat -ni | \
         egrep -v "::|127.0.0.1|^Name|lo0|enc|pflog" | \
@@ -40,7 +45,6 @@ if [ -z ${MYUNAME} ]; then
 fi
 
 API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
-
 # Check for an update to the siteNN.tgz; be very careful!!!
 if [[ ! -z ${API_SERVER} ]]; then
     MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
@@ -62,6 +66,8 @@ if [[ ! -z ${API_SERVER} ]]; then
             fi
         fi
     fi
+    ensure_package "bash"
+    ensure_package "python"
 
     # We didn't exit from the above routines, so we'll check in.
     API_COMMAND="checkin/${MYNAME}/$(date +%s)/${MYIPS}/${MYUNAME}"
