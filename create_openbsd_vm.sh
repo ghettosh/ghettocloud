@@ -49,7 +49,8 @@ function set_least_busy_host(){
     print_blue "INFO: Choosing the least loaded hypervisor for this vm..."
     TARGET=
     for HYPERVISOR in ${VALIDHYPERVISORS[@]}; do
-        VMCOUNT="$(ssh ${HYPERVISOR} virsh list | egrep 'running' | wc -l)"
+        VMCOUNT="$(ssh -q ${HYPERVISOR} virsh list 2>/dev/null | \
+            egrep 'running' | wc -l)" 
         if [ -z ${VMCOUNT} ]; then
             VMCOUNT=NULL
         fi
