@@ -146,6 +146,8 @@ function make_virsh_script(){
     echo "virt-install --connect qemu:///system \
     --virt-type kvm \
     --name ${VM} \
+    --os-type unix \
+    --os-variant openbsd4 \
     --ram 512 \
     --nonetworks \
     --disk path=/imgstorage/${VM}.img,size=3 \

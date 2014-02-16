@@ -5,3 +5,4 @@ site-backups
 auto_install
 pxeboot
 bsd
+pxelinux/
