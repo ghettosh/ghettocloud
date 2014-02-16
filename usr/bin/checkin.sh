@@ -72,7 +72,7 @@ if [[ ! -z ${API_SERVER} ]]; then
         fi
     fi
     ensure_package "bash"
-    ensure_package "python"
+    ensure_package "python-2.7.6p0"
 
     # We didn't exit from the above routines, so we'll check in.
     API_COMMAND="checkin/${MYNAME}/$(date +%s)/${MYIPS}/${MYUNAME}"
