@@ -19,14 +19,14 @@ if [ ! -f /root/.ssh/authorized_keys ]; then
     chmod 600 /root/.ssh/authorized_keys
 fi
 
-if ! grep PKG_PATH /root/.profile > /dev/null 2>&1; then
+if ! grep 'export PKG_PATH' /root/.profile > /dev/null 2>&1; then
     if [ $(uname -r) == "5.5" ]; then
         RELEASE=snapshots
     else
         RELEASE=`uname -r`
     fi
     PKG_PATH="http://openbsd.mirrorcatalogs.com/${RELEASE}/packages/`uname -m`"
-    echo "PKG_PATH=${PKG_PATH}" >> /root/.profile
+    echo "export PKG_PATH=${PKG_PATH}" >> /root/.profile
 fi
 
 MYIPS=$(netstat -ni | \
