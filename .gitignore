@@ -6,3 +6,4 @@ auto_install
 pxeboot
 bsd
 pxelinux/
+relayd_instances/

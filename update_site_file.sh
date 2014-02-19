@@ -21,7 +21,7 @@ REMOTESUM=$(ssh ${SSH_OPTIONS} ${API_HEAD} cat ${API_REMOTE_SUM})
 if [[ ${CHECKIN_MD5} != ${REMOTESUM} ]]; then
     CMD="ssh ${SSH_OPTIONS} ${API_HEAD} echo ${CHECKIN_MD5} > ${API_REMOTE_SUM}"
     echo "INFO: Running $CMD"                                                   
-    $CMD && { echo "INFO: Success"; } || { echo "INFO: Failed"; }               
+    $CMD > /dev/null 2>&1 && { echo "INFO: Success"; } || { echo "INFO: Failed"; }               
 else
     echo "INFO: Up-to-date"
 fi
@@ -46,9 +46,9 @@ for DISTRIBUTION in ${DISTRIBUTIONS_TO_UPDATE[@]}; do
     echo "INFO: Running $CMD"
     $CMD && { echo "INFO: Success"; } || { echo "INFO: Failed"; }
 
-    CMD="`which scp` ${SCP_OPTIONS} openbsd-mirror-${DISTRIBUTION}/site${VERSION}.tgz ${API_SSHUSER}@${API_HEAD}:${API_REMOTE_FILE}"
+    CMD="`which scp` ${SCP_OPTIONS} openbsd-mirror-${DISTRIBUTION}/site${VERSION}.tgz ${API_SSHUSER}@${API_HEAD}:${API_REMOTE_FILE} "
     echo "INFO: Running $CMD"
-    $CMD && { echo "INFO: Success"; } || { echo "INFO: Failed"; }
+    $CMD > /dev/null 2>&1 && { echo "INFO: Success"; } || { echo "INFO: Failed"; }
 
     CMD="cd openbsd-mirror-${DISTRIBUTION} ; ls -l > index.txt"
     echo "INFO: Running $CMD"
