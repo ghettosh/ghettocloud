@@ -33,24 +33,23 @@ if [[ "$(uname)" != "OpenBSD" ]]; then
 fi
 
 function banner(){
-    print_yellow "\n\n********************************************************************************\n"
-    print_white "OpenBSD VM Creator\n"
-    print_yellow "********************************************************************************\n\n"
+    print_white "\n\n\tOpenBSD VM Creator\n"
 }
 
 function set_random_host(){
-    print_blue "INFO: Choosing random hypervisor for this vm..."
+    print_blue "INFO:"; printf " Choosing random hypervisor for this vm..."
     TARGET=${VALIDHYPERVISORS[$(( $RANDOM % ${#VALIDHYPERVISORS[@]} ))]}
     echo "chose ${TARGET}"
 }
 
 function set_least_busy_host(){
     TEMPFILE=`mktemp`
-    print_blue "INFO: Choosing the least loaded hypervisor for this vm..."
+    print_blue "INFO:";
+        printf " Choosing the least loaded hypervisor for this vm..."
     TARGET=
     for HYPERVISOR in ${VALIDHYPERVISORS[@]}; do
         VMCOUNT="$(ssh -q ${HYPERVISOR} virsh list 2>/dev/null | \
-            egrep 'running' | wc -l)" 
+            grep 'running' | wc -l)" 
         if [ -z ${VMCOUNT} ]; then
             VMCOUNT=NULL
         fi
@@ -58,7 +57,8 @@ function set_least_busy_host(){
     done
     grep NULL $TEMPFILE > /dev/null 2>&1
     if [[ $? -eq 0 ]]; then
-        print_yellow "WARN: One or more hypervisor didn't report a vm count\n"
+        print_yellow "WARN:";
+            printf " One or more hypervisor didn't report a vm count\n"
     fi
     TARGET="$(sort -nrk2 $TEMPFILE | tail -1 | awk '{print $1}')"
     if [ -z ${TARGET} ]; then
@@ -213,6 +213,7 @@ function log_step(){
 #
 # main()
 #
+
 ARGC=$#
 if [[ $ARGC -ne 1 ]]; then
     usage
@@ -222,16 +223,17 @@ else
     VM=$1
 fi
 
-# VALIDHYPERVISORS=( 192.168.20.105 )
 VALIDHYPERVISORS=( 192.168.20.10{2,3,4,5} )
 ROADSIGN="http://ghetto.sh/roadsign.txt"
 
 banner
-generate_random_mac
-log_step "Generating random mac address"
-make_openbsd_answerfile ${MAC} ${VM}
-log_step "Made answer file"
-make_virsh_script ${MAC} ${VM}
-log_step "Made virsh script"
-doit 
-log_step "Started the build on ${TARGET}"
+
+generate_random_mac && log_step "Generated random mac address" || \
+    log_step "Failed to generate random mac address"
+make_openbsd_answerfile ${MAC} ${VM} && log_step "Made answer file" || \
+    log_step "Failed to make answer file"
+make_virsh_script ${MAC} ${VM} && log_step "Made virsh script" || \
+    log_step "Failed to create virsh script"
+doit && log_step "Started the build on ${TARGET}" || \
+    log_step "Failed to start build"
+

@@ -7,17 +7,14 @@ function ensure_package {
     fi
 }
 
+PKGMIRROR="http://openbsd.mirrorcatalogs.com"
+PATHTOROOTKEY="/static/authorized_keys"
 MYNAME="$(uname -n | cut -d. -f1)"
 MYUNAME="$(uname -a | tr ' ' ',')"
 MYIPS=
 ROADSIGN=http://ghetto.sh/roadsign.txt # Location of a file that tells this 
                                        # script where the API head is.
 
-if [ ! -f /root/.ssh/authorized_keys ]; then
-    mkdir -p /root/.ssh > /dev/null 2>&1
-    echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5JWrV003FzR+5B4kOY3csxgtMHqX4YU8Q21MDhBAZcgLsK0nM00Tlv1qvifeUxvffmYm9eFCcJa0pFq8P239vQiFzUc8IQn03+HKZkovDHIhRbHt/ljoBiRfoCWxq44iXwuj1hGxvX5Q5aNPkskHoD8S/IQN2Gup65N/lumh8dosdi5nPtdldpoAkQBGcnUHt0sX42ZchvE0YaoM7NfPmOrysEeSzsUFDf2C3Ix+SP89lRAU9uD2dOfSTnDG6bT0yzHIw7WwSytRx5Ry9CvXaAwgCzPL55dlfdScScAJfOSBKO5hh3W7sKN9huV6esDt8z7qYsUIidvErZIoTHNkr gonzalen@yaaarrrr.local" >> /root/.ssh/authorized_keys
-    chmod 600 /root/.ssh/authorized_keys
-fi
 
 if ! grep 'export PKG_PATH' /root/.profile > /dev/null 2>&1; then
     if [ $(uname -r) == "5.5" ]; then
@@ -25,7 +22,7 @@ if ! grep 'export PKG_PATH' /root/.profile > /dev/null 2>&1; then
     else
         RELEASE=`uname -r`
     fi
-    PKG_PATH="http://openbsd.mirrorcatalogs.com/${RELEASE}/packages/`uname -m`"
+    PKG_PATH="${PKGMIRROR}/${RELEASE}/packages/`uname -m`"
     echo "export PKG_PATH=${PKG_PATH}" >> /root/.profile
 fi
 
@@ -52,6 +49,12 @@ fi
 API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
 # Check for an update to the siteNN.tgz; be very careful!!!
 if [[ ! -z ${API_SERVER} ]]; then
+    if [ ! -f /root/.ssh/authorized_keys ]; then
+        mkdir -p /root/.ssh > /dev/null 2>&1
+        PUBKEY=$(ftp -Vo- -r 5 http://${API_SERVER}/${PATHTOROOTKEY})
+        echo "${PUBKEY}" >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
+    fi
     MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
     REMOTESUM=$(ftp -Vo- -r 5 http://${API_SERVER}/static/sitesum 2>/dev/null | tr -d ' ')
     if [ -z ${REMOTESUM} ]; then
@@ -69,11 +72,14 @@ if [[ ! -z ${API_SERVER} ]]; then
                 echo "FATAL: File was not downloaded properly"
                 exit 1
             fi
+
+        MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
         fi
     fi
     ensure_package "bash"
     ensure_package "python-2.7.6p0"
 
+    MYUNAME="${MYUNAME} agent version ${MYSUM}"
     # We didn't exit from the above routines, so we'll check in.
     API_COMMAND="checkin/${MYNAME}/$(date +%s)/${MYIPS}/${MYUNAME}"
     URL="http://${API_SERVER}/${API_COMMAND}"
