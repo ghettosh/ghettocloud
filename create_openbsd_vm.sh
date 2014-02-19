@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-# This script is pretty specific to my environment; grep for 'Configure me' to see what you should
-# change.
+# This script is pretty specific to my environment; grep for 'Configure me' to 
+# see what you should change
 #
 # This script does the following:
 #  
 #   generate_random_mac
-#     generates a mac address manually so we can track this VM from the beginning of its life
+#     generates a mac address manually so we can track this VM from the 
+#     beginning of its life
 #   
 #   make_openbsd_answerfile ${MAC} ${VM}
 #     Make an answer file using the MAC and VM name as seeds
 #
 #   make_virsh_script ${MAC} ${VM}
-#     Make a shellscript we can ship to a remote host and run using the MAC and VM name as seeds
+#     Make a shellscript we can ship to a remote host and run using the MAC and
+#     VM name as seeds
 #
 #   doit
 #     Send the mentioned shellscript to a remote host and run it.
@@ -33,7 +35,7 @@ if [[ "$(uname)" != "OpenBSD" ]]; then
 fi
 
 function banner(){
-    print_white "\n\n\tOpenBSD VM Creator\n"
+    print_pink "\n\n\tGhetto.sh OpenBSD VM Creator\n"
 }
 
 function set_random_host(){
@@ -82,7 +84,7 @@ function random_hex_value(){
 }
 
 function generate_random_mac(){
-    print_blue "INFO: generating a MAC address..."
+    print_blue "INFO:"; printf " generating a MAC address..."
     MAC=( '00' 'de' 'ad' )
     for i in {1..3}; do
         MAC+=( $(random_hex_value) )
@@ -92,19 +94,19 @@ function generate_random_mac(){
     echo "chose ${MAC}"
 }
 
-
 function make_openbsd_answerfile(){
     MAC=$1
     NAME=$2
     FILE=./${MAC}-install.conf
     PASSWORD=$(date +%s | md5 | cut -c -12)
     if [ ! -z $ANSWER_FILE ]; then
-        print_yellow "INFO: Detected user-specified answer file. using that\n"
+        print_yellow "INFO:"
+            printf " Detected user-specified answer file. using that\n"
         cp ${ANSWER_FILE} ${FILE} 
         return
     fi
     # Configure me - you will likely want to change this answerfile template
-    print_blue "INFO: Writing seed file: ${FILE}..."
+    print_blue "INFO:"; printf " Writing seed file: ${FILE}..."
     cat << EOT > ${FILE}
 system hostname = ${NAME}
 password for root account = ${PASSWORD}
@@ -120,21 +122,15 @@ Set name(s)? = site55.tgz
 Install sets anyway? = yes
 Directory does not contain SHA256.sig. Continue without verification? = yes
 EOT
-    echo "wrote ${FILE}"
-    print_pink "INFO: Root password will be: $(grep ^password ${FILE} | cut -d= -f2)\n"
+    echo "ok"
 }
 
 function make_virsh_script(){
     MAC=${1}
     VM=${2}
-    # Configure me - the INSTALL_SCRIPT variable contains a variable called 'str'. I have to do this because the
-    # version of virt-install on my centos hypervisors is not recent enough to support automagically adding 
-    # a port to a vswitch. We print the XML for a domain without any NICs then manually add the interface stanza
-    # via sed, like a caveman. If you are cool enough to be running openvswitch-trunk on centos65 like I am, just
-    # make sure you set the bridge properly. Otherwise you can pretty much take out the 'str' crap and change 
-    # --nonetworks in the virt-install command to something you would normally use, e.g. --network bridge=br2
-    INSTALL_SCRIPT="./install_scripts/install-${VM}.sh"
-    print_blue "INFO: Writing virsh shellscript: ${INSTALL_SCRIPT}..."
+    VMHASH=$(echo ${RANDOM}${VM}${RANDOM} | md5)
+    INSTALL_SCRIPT="./install_scripts/install-${VMHASH}.sh"
+    print_blue "INFO:"; printf " Writing shellscript: ${INSTALL_SCRIPT}..."
     echo "str=\"  <interface type='bridge'>\n\"          " > ${INSTALL_SCRIPT}    
     echo "str+=\"   <mac address='${MAC}'/>\n\"         " >> ${INSTALL_SCRIPT}      
     echo "str+=\"   <source bridge='br100'/>\n\"        " >> ${INSTALL_SCRIPT}      
@@ -145,25 +141,27 @@ function make_virsh_script(){
     echo "str+=\"  </devices>\"                         " >> ${INSTALL_SCRIPT}
     echo "virt-install --connect qemu:///system \
     --virt-type kvm \
-    --name ${VM} \
+    --name ${VMHASH} \
     --os-type unix \
     --os-variant openbsd4 \
     --ram 512 \
     --nonetworks \
-    --disk path=/imgstorage/${VM}.img,size=3 \
+    --disk path=/imgstorage/${VMHASH}.img,size=3 \
     --graphics none \
     --boot hd \
     --print-xml \
     --os-type unix \
-    --os-variant openbsd4 | sed -e \"s#</devices>#\${str}#g\" > ${VM}.xml      " >> ${INSTALL_SCRIPT}
-    echo "virsh define ${VM}.xml && virsh start ${VM}  " >> ${INSTALL_SCRIPT}
+    --os-variant openbsd4 | sed -e \"s#</devices>#\${str}#g\" > ${VMHASH}.xml" \
+        >> ${INSTALL_SCRIPT}
+    echo "virsh define ${VMHASH}.xml && virsh start ${VMHASH}" \
+        >> ${INSTALL_SCRIPT}
     echo "ok"
 }
 
 function doit(){
     # set_random_host
     set_least_busy_host
-    print_blue "INFO: Sending script to remote target: ${TARGET}..."
+    print_blue "INFO:"; printf " Sending script to remote target: ${TARGET}..."
     scp ${INSTALL_SCRIPT} ${TARGET}: >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
         echo "ok"
@@ -171,11 +169,26 @@ function doit(){
         echo "failed"
         exit 1
     fi
-    print_blue "INFO: Executing script on ${TARGET}..."
+    print_blue "INFO:"; printf " Executing script on ${TARGET}..."
     ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT##.*/}" >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-        echo "success"
-        print_white "INFO: Check the API for registration/further information\n"
+        echo "ok"
+        if [[ $USING_DATABASE == 1 ]]; then
+        print_blue "INFO:"; printf " Updating local database..."
+        ${SQLITE3} ${DBFILE} "insert into vms ( hostname,
+                                                realname,
+                                                macaddr,
+                                                rootpw,
+                                                hypervisor,
+                                                creationdate ) VALUES (
+                                                  '${VM}',
+                                                  '${VMHASH}',
+                                                  '${MAC}',
+                                                  '${PASSWORD}',
+                                                  '${TARGET}',
+                                                  '$(date +%s)')" && \
+        echo "ok" || echo "failed"
+        fi
     else
         print_red "FATAL: Failure when trying to execute the remote script\n"
     fi
@@ -185,9 +198,9 @@ function usage(){
     banner
     print_red "Usage\n"
     print_red "-----\n"
-    print_red " [ANSWER_FILE=/path/to/my/file] $0 <vm name>\n"
-    print_white "\nExamples\n"
-    print_white "--------\n"
+    print_yellow " [ANSWER_FILE=/path/to/my/file] $0 <vm name>\n"
+    print_red "\nExamples\n"
+    print_red "--------\n"
     print_white "  create a vm called hippo using an auto-generated answerfile:\n"
     print_yellow "  $0 hippo\n\n"
     print_white "  Create a vm called doge using a specified answer file:\n"
@@ -223,8 +236,16 @@ else
     VM=$1
 fi
 
+USING_DATABASE=1              # Set this value to 1 to update a sqlite db
+                              # leave it at zero to use your own stuff
 VALIDHYPERVISORS=( 192.168.20.10{2,3,4,5} )
 ROADSIGN="http://ghetto.sh/roadsign.txt"
+
+SQLITE3=`which sqlite3 2>/dev/null`
+SQLITE3=${SQLITE3:?FATAL: no sqlite3 found}
+
+DBFILE=./ghetto.db            # Configure me; you should have made this with
+DBFILE=${DBFILE:?$(usage)}    # initialize-db.sh
 
 banner
 
