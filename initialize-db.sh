@@ -33,5 +33,6 @@ ${SQLITE3} ${DBFILE} "create table vms (id INTEGER PRIMARY KEY,
                   creationdate TEXT)"
 
 echo "==> initialized db"
-echo "==> schema:"
+echo "==> database schema:"
 ${SQLITE3} ${DBFILE} ".schema"
+echo "==> done"
