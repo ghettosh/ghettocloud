@@ -1,5 +1,0 @@
-[Thu Feb 20 14:31:18 2014] [error] [client 172.16.0.178] client denied by server configuration: /data/serve/ghettoapi/cgi/.htaccess
-Traceback (most recent call last):
-  File "/data/serve/ghettoapi/cgi/checkin", line 87, in <module>
-    VALUES ('%s','%s','%s','%s','%s')''' % (  params['message'],
-KeyError: 'message'
