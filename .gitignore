@@ -1,3 +1,4 @@
+.gitignore
 openbsd-mirror-*
 00:de:ad*
 install_scripts
@@ -8,5 +9,5 @@ bsd
 pxelinux/
 relayd_instances/
 *.db
-*/access_log
-*/error_log
+ghettoapi/logs/access_log
+ghettoapi/logs/error_log
