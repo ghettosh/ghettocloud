@@ -18,6 +18,8 @@ function usage(){
   echo " $0 <-c command> "
   print_red "Commands are any one of the following:\n"
   echo "  list-vms"
+  echo "  list-hypervisors"
+  echo "  list-events [number of events to recall]"
   echo "  delete-vm <hash>"
   echo "  list-hypervisors"
   echo "  show-checkin <vm name>"
@@ -73,6 +75,18 @@ function delete-vm(){
     echo "ok"
   fi
   print_blue "INFO:"; printf " successfully removed ${VM}\n"
+}
+
+function list-events(){
+  EVCOUNT=${1}
+  if  [[ ! ${EVCOUNT} =~ [0-9+] ]] || \
+      [[ ${EVCOUNT} -ge 250 ]] || \
+      [[ -z ${EVCOUNT} ]]; then
+    EVCOUNT=10
+  fi
+  print_blue "INFO: Showing the last ${EVCOUNT} events\n"
+  ${SQLITE3} -header -column \
+    ${DBFILE} "SELECT * FROM events ORDER BY id DESC LIMIT ${EVCOUNT};"
 }
   
 
@@ -141,8 +155,9 @@ fi
 #
 
 case ${command} in
-  list-vms)       list-vms;;
+  list-vms)           list-vms;;
   list-hypervisors)   list-hypervisors;;
-  delete-vm)      delete-vm ${1};;
+  list-events)        list-events ${1};;
+  delete-vm)          delete-vm ${1};;
   *)      print_red "Unrecognized command: ${command}\n"; exit 1;;
 esac
