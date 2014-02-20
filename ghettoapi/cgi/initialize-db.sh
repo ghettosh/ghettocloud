@@ -24,13 +24,20 @@ fi
 
 echo "==> reinitializing database at ${DBFILE}"
 
-${SQLITE3} ${DBFILE} "create table vms (id INTEGER PRIMARY KEY,
+${SQLITE3} ${DBFILE} "CREATE TABLE vms (id INTEGER PRIMARY KEY,
                   hostname TEXT, 
                   realname TEXT,
                   macaddr TEXT, 
                   rootpw TEXT, 
                   hypervisor TEXT,
-                  creationdate TEXT)"
+                  creationdate TEXT);"
+
+${SQLITE3} ${DBFILE} "CREATE TABLE events (id INTEGER PRIMARY KEY,
+                  message TEXT, 
+                  date TEXT, 
+                  uptime TEXT, 
+                  ip TEXT, 
+                  hostname TEXT);"
 
 echo "==> initialized db"
 echo "==> database schema:"

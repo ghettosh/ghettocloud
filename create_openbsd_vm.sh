@@ -244,8 +244,10 @@ ROADSIGN="http://ghetto.sh/roadsign.txt"
 SQLITE3=`which sqlite3 2>/dev/null`
 SQLITE3=${SQLITE3:?FATAL: no sqlite3 found}
 
-DBFILE=./ghetto.db            # Configure me; you should have made this with
-DBFILE=${DBFILE:?$(usage)}    # initialize-db.sh
+if [[ ${USING_DATABASE} -eq 1 ]]; then
+  DBFILE=/data/serve/ghettoapi/cgi/ghetto.db   # Configure me
+  DBFILE=${DBFILE:?$(usage)}
+fi
 
 banner
 
