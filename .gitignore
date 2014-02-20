@@ -7,4 +7,6 @@ pxeboot
 bsd
 pxelinux/
 relayd_instances/
-ghetto.db
+*.db
+access_log
+error_log
