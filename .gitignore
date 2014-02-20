@@ -9,5 +9,3 @@ bsd
 pxelinux/
 relayd_instances/
 *.db
-ghettoapi/logs/access_log
-ghettoapi/logs/error_log

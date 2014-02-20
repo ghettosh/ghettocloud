@@ -41,6 +41,10 @@ function list-hypervisors(){
 
 function delete-vm(){
   VM="$1"
+  if [[ -z ${VM} ]]; then
+    print_red "FATAL: VM name is blank. Exiting\n"
+    exit 1
+  fi
   HYPERVISOR=$( ${SQLITE3} ${DBFILE} "select hypervisor
                     from vms where 
                     realname='"${VM}"';" )
@@ -68,7 +72,7 @@ function delete-vm(){
   else
     echo "ok"
   fi
-  print_blue "INFO:"; printf " successfully removed ${VM}"
+  print_blue "INFO:"; printf " successfully removed ${VM}\n"
 }
   
 
