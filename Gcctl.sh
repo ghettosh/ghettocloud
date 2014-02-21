@@ -85,8 +85,10 @@ function list-events(){
     EVCOUNT=10
   fi
   print_blue "INFO: Showing the last ${EVCOUNT} events\n"
-  ${SQLITE3} -header -column \
-    ${DBFILE} "SELECT * FROM events ORDER BY id DESC LIMIT ${EVCOUNT};"
+  ${SQLITE3} -header -column ${DBFILE} \
+    "SELECT * FROM ( 
+      SELECT * FROM events ORDER BY id DESC LIMIT ${EVCOUNT} )
+      ORDER BY id ASC"
 }
   
 
