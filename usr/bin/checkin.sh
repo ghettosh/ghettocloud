@@ -1,5 +1,16 @@
 #!/usr/bin/env sh
 
+# ------
+# moving these to cdist
+# ------
+# function ensure_package {
+#     PKG=$1
+#     if ! pkg_info | grep "^${PKG}" > /dev/null 2>&1; then
+#         . /root/.profile && pkg_add -r ${PKG}
+#     fi
+# }
+# PKGMIRROR="http://openbsd.mirrorcatalogs.com"
+# PATHTOROOTKEY="/static/authorized_keys"
 
 MYNAME="$(uname -n | cut -d. -f1)"
 MYUNAME="$(uname -a | tr ' ' ',')"
@@ -42,12 +53,49 @@ fi
 API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
 # Check for an update to the siteNN.tgz; be very careful!!!
 if [ ! -z ${API_SERVER} ]; then
+  # ------
+  # moving these to cdist
+  # ------
+  # if ! grep 'export PKG_PATH' /root/.profile > /dev/null 2>&1; then
+  #   if [ $(uname -r) == "5.5" ]; then
+  #     RELEASE=snapshots
+  #   else
+  #     RELEASE=`uname -r`
+  #   fi
+  #   PKG_PATH="${PKGMIRROR}/${RELEASE}/packages/`uname -m`"
+  #   echo "export PKG_PATH=${PKG_PATH}" >> /root/.profile
+  # fi
   MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
-  REMOTESUM
+  URL="${API_SERVER}/checkin?update=$(uname -r)&myver=$(md5 $0 | cut -d= -f2)"
+  REMOTESUM=$(ftp -Vo- ${URL})
+  echo "${REMOTESUM}" | grep 'update_required' > /dev/null 2>&1
+  if [ $? -eq 0 ];then
+    echo "INFO: updating"
+    TARGETFILE="$(echo $REMOTESUM | grep -oE "htt(p|ps)://.*.tgz")"
+    echo "INFO: Getting $TARGETFILE"
+    RELEASE=$(uname -r | tr -d '.')
+    cd /tmp
+    ftp -V ${TARGETFILE} 2>/dev/null    
+    if [ -f /tmp/site${RELEASE}.tgz ]; then                              
+      tar -zxvf /tmp/site${RELEASE}.tgz -C /                           
+    else                                                                 
+      echo "FATAL: File was not downloaded properly"                   
+      exit 1                                                           
+    fi                                                                   
+  fi
+  # ------
+  # moving these to cdist
+  # ------
+  # ensure_package "bash"
+  # ensure_package "python-2.7.6p0"
 
+  MYUNAME="${MYUNAME} agent version ${MYSUM}"
   # We didn't exit from the above routines, so we'll check in.
   API_COMMAND="checkin?"
   API_COMMAND="${API_COMMAND}state=${STATE}-${MYSUM}&"
+  # API_COMMAND="${API_COMMAND}date=$(date +%s)&"
+  # API_COMMAND="${API_COMMAND}uptime=${UPTIME}&"
+  # API_COMMAND="${API_COMMAND}loadavg=${LOADAVG}&"
   API_COMMAND="${API_COMMAND}ip=${MYIP}&"
   API_COMMAND="${API_COMMAND}macaddr=${MYMAC}&"
   API_COMMAND="${API_COMMAND}hostname=$(uname -n)"
