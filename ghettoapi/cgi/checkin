@@ -24,7 +24,7 @@ dists = {
 current_sum = md5(open(litmus_file, 'r').read()).hexdigest()
 
 params = {}
-debug = False
+debug = True
 qs = parse_qs(os.environ['QUERY_STRING'])
 
 ###### main() ######
