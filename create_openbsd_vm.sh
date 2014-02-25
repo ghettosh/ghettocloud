@@ -174,20 +174,27 @@ function doit(){
     if [ $? -eq 0 ]; then
         echo "ok"
         if [[ $USING_DATABASE == 1 ]]; then
-        print_blue "INFO:"; printf " Updating local database..."
-        ${SQLITE3} ${DBFILE} "insert into vms ( hostname,
-                                                realname,
-                                                macaddr,
-                                                rootpw,
-                                                hypervisor,
-                                                creationdate ) VALUES (
-                                                  '${VM}',
-                                                  '${VMHASH}',
-                                                  '${MAC}',
-                                                  '${PASSWORD}',
-                                                  '${TARGET}',
-                                                  '$(date +%s)')" && \
-        echo "ok" || echo "failed"
+          print_blue "INFO:"; printf " Updating local database...(1 of 1)..."
+          ${SQLITE3} ${DBFILE} "INSERT INTO vms ( realname,
+                                                  state,
+                                                  macaddr,
+                                                  rootpw,
+                                                  hypervisor,
+                                                  creationdate ) VALUES (
+                                                    '${VMHASH}',
+                                                    'in_build',
+                                                    '${MAC}',
+                                                    '${PASSWORD}',
+                                                    '${TARGET}',
+                                                    '$(date +%s)')" && \
+          echo "ok" || echo "failed"
+
+          #print_blue "INFO:"; printf " Updating local database...(2 of 2)..."
+          #${SQLITE3} ${DBFILE} "INSERT INTO events (  state, 
+          #                                            macaddr )
+          #                      VALUES (  'in_build', 
+          #                                '${MAC}')" && \
+          #echo "ok" || echo "failed"
         fi
     else
         print_red "FATAL: Failure when trying to execute the remote script\n"
@@ -214,8 +221,8 @@ function log_step(){
     STEP="$(echo $STEP | tr -dc 'a-zA-Z0-9-+.' )" # Sanitize                    
     TARGET=$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)                             
     if [ ! -z ${TARGET} ]; then                                                 
-        API_CALL="buildlog/${VM}/$(date +%s)/${STEP}"                           
-        URL="http://${TARGET}/${API_CALL}"                                      
+        API_CALL="buildlog?vm=${VM}&date=$(date +%s)&step=${STEP}"                           
+        URL="${TARGET}/${API_CALL}"                                      
         OUTPUT=$(ftp -Vo- -r5 ${URL} 2>/dev/null)                               
         if [[ -z ${OUTPUT} ]]; then                                             
             print_red "FATAL: Failed to log to build API on step: $STEP\n" 
@@ -251,12 +258,8 @@ fi
 
 banner
 
-generate_random_mac && log_step "Generated random mac address" || \
-    log_step "Failed to generate random mac address"
-make_openbsd_answerfile ${MAC} ${VM} && log_step "Made answer file" || \
-    log_step "Failed to make answer file"
-make_virsh_script ${MAC} ${VM} && log_step "Made virsh script" || \
-    log_step "Failed to create virsh script"
-doit && log_step "Started the build on ${TARGET}" || \
-    log_step "Failed to start build"
+generate_random_mac && \
+make_openbsd_answerfile ${MAC} ${VM} && \
+make_virsh_script ${MAC} ${VM} && \
+doit 
 

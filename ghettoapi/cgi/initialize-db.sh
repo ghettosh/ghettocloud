@@ -11,7 +11,10 @@ SQLITE3=${SQLITE3:?FATAL: no sqlite3 found}
 DBFILE=$1
 DBFILE=${DBFILE:?$(usage)}
 
-if [[ ! ${DBFILE} =~ *.db ]]; then DBFILE=${DBFILE}.db; fi
+DBUSER="www"
+DBGROUP="daemon"
+
+if [[ ! ${DBFILE} =~ .*.db ]]; then DBFILE=${DBFILE}.db; fi
 
 if [[ ! -r ${DBFILE} ]]; then 
     echo "==> Database file: ${DBFILE} not found, creating one"
@@ -25,21 +28,23 @@ fi
 echo "==> reinitializing database at ${DBFILE}"
 
 ${SQLITE3} ${DBFILE} "CREATE TABLE vms (id INTEGER PRIMARY KEY,
-                  hostname TEXT, 
-                  realname TEXT,
-                  macaddr TEXT, 
-                  rootpw TEXT, 
-                  hypervisor TEXT,
-                  creationdate TEXT);"
+                        realname TEXT,
+                        hostname TEXT,
+                        state TEXT,
+                        ip TEXT,
+                        macaddr TEXT, 
+                        rootpw TEXT, 
+                        hypervisor TEXT,
+                        creationdate TEXT);"
 
-${SQLITE3} ${DBFILE} "CREATE TABLE events (id INTEGER PRIMARY KEY,
+${SQLITE3} ${DBFILE} "CREATE TABLE messages (id INTEGER PRIMARY KEY,
                   message TEXT, 
                   date TEXT, 
-                  uptime TEXT, 
-                  ip TEXT, 
-                  hostname TEXT);"
+                  macaddr TEXT);"
 
 echo "==> initialized db"
 echo "==> database schema:"
 ${SQLITE3} ${DBFILE} ".schema"
+echo "==> setting permissions on dbfile"
+chown ${DBUSER}:${DBGROUP} ${DBFILE}
 echo "==> done"
