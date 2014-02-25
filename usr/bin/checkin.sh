@@ -89,10 +89,9 @@ if [ ! -z ${API_SERVER} ]; then
   # ensure_package "bash"
   # ensure_package "python-2.7.6p0"
 
-  MYUNAME="${MYUNAME} agent version ${MYSUM}"
   # We didn't exit from the above routines, so we'll check in.
   API_COMMAND="checkin?"
-  API_COMMAND="${API_COMMAND}state=${STATE}-${MYSUM}&"
+  API_COMMAND="${API_COMMAND}state=${STATE}&"
   # API_COMMAND="${API_COMMAND}date=$(date +%s)&"
   # API_COMMAND="${API_COMMAND}uptime=${UPTIME}&"
   # API_COMMAND="${API_COMMAND}loadavg=${LOADAVG}&"
