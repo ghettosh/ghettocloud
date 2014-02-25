@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
 
 
-PKGMIRROR="http://openbsd.mirrorcatalogs.com"
-PATHTOROOTKEY="/static/authorized_keys"
 MYNAME="$(uname -n | cut -d. -f1)"
 MYUNAME="$(uname -a | tr ' ' ',')"
 INTERFACE_WITH_DEFAULT_GW=$(netstat -nrfinet | awk '/^default/{print $8}')
@@ -44,15 +42,6 @@ fi
 API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
 # Check for an update to the siteNN.tgz; be very careful!!!
 if [ ! -z ${API_SERVER} ]; then
-  if ! grep 'export PKG_PATH' /root/.profile > /dev/null 2>&1; then
-    if [ $(uname -r) == "5.5" ]; then
-      RELEASE=snapshots
-    else
-      RELEASE=`uname -r`
-    fi
-    PKG_PATH="${PKGMIRROR}/${RELEASE}/packages/`uname -m`"
-    echo "export PKG_PATH=${PKG_PATH}" >> /root/.profile
-  fi
   MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
   REMOTESUM
 
