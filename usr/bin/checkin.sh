@@ -104,6 +104,5 @@ if [ ! -z ${API_SERVER} ]; then
   URL="${API_SERVER}/${API_COMMAND}"
   echo "hitting $URL"
   ftp -Vo- -r 2 ${URL} 2>/dev/null
+  sendlog.pl "checked in"
 fi
-
-sendlog.pl "checkin run ended"

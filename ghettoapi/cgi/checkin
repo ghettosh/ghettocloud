@@ -103,6 +103,9 @@ if 'message' in qs:
     print "FATAL: Mac address not specified"
     sys.exit(1)
 
+  if len(msg) > 50:
+    print "FATAL: Message too large"
+    sys.exit(1)
   if debug: print "debug: got message:%s, date: %s, macaddr: %s" % (msg,
                                                                     msgdate,
                                                                     macaddr)
