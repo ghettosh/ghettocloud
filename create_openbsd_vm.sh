@@ -35,7 +35,7 @@ if [[ "$(uname)" != "OpenBSD" ]]; then
 fi
 
 function banner(){
-    print_pink "\n\n\tGhetto.sh OpenBSD VM Creator\n"
+    print_pink "\tGhetto.sh OpenBSD VM Creator\n"
 }
 
 function set_random_host(){
