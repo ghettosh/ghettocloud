@@ -91,7 +91,7 @@ table <webhosts-%s> { $webhost0 $webhost1 $webhost2 $webhost3 }
 redirect www-%s {
         listen on $ext_addr port %s interface re1
         tag RELAYD
-        forward to <webhosts-%s> check http "/" code 200
+        forward to <webhosts-%s> port www check http "/" code 200
 }
 ''' % (cust,cust,port,cust)
     servers = ' '.join(relayd_map[cust])
