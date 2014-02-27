@@ -25,7 +25,8 @@ To Do
 -----
 
   - Write a proper REST API to handle incoming 'registrations' 
-  - implement "firstrun" capabilities into the 'checkin.sh' script for installing packages/ports/other post-install configurations
+  - implement "firstrun" capabilities into the 'checkin.sh' script for
+    installing packages/port/other post-install configurations
   - add some getopt funcitonality to allow for customizatoin of the virt-install
     command
   - Expand checkin.sh to send a lot more data
@@ -35,8 +36,8 @@ Pre Requisites
 --------------
 
   * 1 or more Linux boxes with libvirt,virt-install installed
-  * at least one OpenBSD machine serving as at least a DHCP server with at lea-
-    st 1GB of storage
+  * at least one OpenBSD machine serving as at least a DHCP server with at least
+    1GB of storage
 
 This directory represents a few things:
 
