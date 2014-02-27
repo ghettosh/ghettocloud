@@ -11,6 +11,7 @@ echo "INFO: Updating API deployment box"
 API_HEAD=$(ftp -Vo- -r5 http://ghetto.sh/roadsign.txt 2>/dev/null | \
             sed -e 's/http:\/\///g' | \
             cut -d: -f1)
+
 ##API_SSHPORT='22'
 #API_SSHPORT='20480'
 ## API_SSHUSER='root'
