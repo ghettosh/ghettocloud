@@ -18,6 +18,7 @@ def usage():
 
   {me}
   {ul}
+  example relayd configurator
 
   Description
   -----------
@@ -25,6 +26,8 @@ def usage():
   based off of live hosts, and hostnames
 
 """.format(me=sys.argv[0], ul=( len(sys.argv[0]) * '-' ) ) 
+
+usage()
 
 try:                                                                            
   db = sqlite3.connect(dbfile)
@@ -103,6 +106,6 @@ redirect www-%s {
     if debug: print "DEBUG: Writing include line: %s" % include_line
     master_conf.write(include_line)
   master_conf.close()
+  print "INFO: Completed configuration for customer %s" % cust
 
-
-print "\n\nPlease run relayctl reload now"
+print "Done\n"
