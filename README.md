@@ -1,8 +1,8 @@
 OpenBSD Cloud
 -------------
 
-This is a lab project. In a sentence, it's a framework I use to rapidly provis-
-ion OpenBSD virtual machines. 
+This is a lab project. In a sentence, it's a framework I use to rapidly
+provision OpenBSD virtual machines.
 
 It provides me with the ability to do the following:
 
@@ -17,15 +17,15 @@ It provides me with the ability to do the following:
     INFO: Updating local database...(1 of 1)...ok
 
 
-Then about 6 minutes later, a the VM created above contacts the REST API and 
+Then about 6 minutes later, a the VM created above contacts the REST API and
 says it's ready, and gives a few bits of information (ip, uname, etc.)
+
 
 To Do
 -----
 
   - Write a proper REST API to handle incoming 'registrations' 
-  - implement "firstrun" capabilities into the 'checkin.sh' script for install-
-    ing packages/ports/other post-install configurations
+  - implement "firstrun" capabilities into the 'checkin.sh' script for installing packages/ports/other post-install configurations
   - add some getopt funcitonality to allow for customizatoin of the virt-install
     command
   - Expand checkin.sh to send a lot more data
