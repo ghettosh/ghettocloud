@@ -9,11 +9,13 @@ from pprint import pprint
 
 print "Content-type: text/plain\n"
 
+# TODO: Move allowed parameters into each query string method, instead of 
+#       defining them globally here
 allowed_parameters =  [ 
                         'state', 
                         'ip', 
                         'macaddr',
-                        'hostname' 
+                        'hostname'
                       ]
 
 litmus_file = '/data/serve/usr/bin/checkin.sh'
@@ -80,9 +82,56 @@ try:
 except:
   print "could not determine REMOTE_ADDR"
 
+#######
+# update the db with a message
+#
+if 'message' in qs:
+  # message, date, macaddr
+  try:
+    msg = ''.join(qs['message'])
+  except:
+    print "FATAL: Message not specified"
+    sys.exit(1)
+  try:
+    msgdate = ''.join(qs['date'])
+  except:
+    print "FATAL: Date not specified"
+    sys.exit(1)
+  try:
+    macaddr = ''.join(qs['macaddr'])
+  except:
+    print "FATAL: Mac address not specified"
+    sys.exit(1)
+
+  if debug: print "debug: got message:%s, date: %s, macaddr: %s" % (msg,
+                                                                    msgdate,
+                                                                    macaddr)
+  sql = '''INSERT INTO messages ( message, date, macaddr ) 
+                  VALUES ( '%s', '%s', '%s' );''' % ( msg, msgdate, macaddr )
+  if debug: print "INFO: executing sql: %s" % sql
+  cursor = db.cursor()
+  try:
+    cursor.execute(sql)
+  except:
+    print "FATAL: Failed to execute sql statement: %s" % sql
+    sys.exit(1)
+  try:
+    db.commit()
+  except:
+    print "FATAL: Failed to commit to database; sql: %s" % sql
+    sys.exit(1)
+  db.close()
+  print "INFO: Successfully updated db"
+  sys.exit(0)
+
+#######
+# check for updates to the site.tgz file
+#
 if 'update' in qs:
+  # update, myver
   dist = ''.join(qs['update'])
-  remote_version = ''.join(qs['myver'])
+  remote_version = ''.join(qs['myver']).strip()
+  
   if debug: 
     print "debug: dist: %s (sum: %s); you sent sum: %s" % (dist,
                                                            current_sum,
@@ -93,6 +142,10 @@ if 'update' in qs:
   
   sys.exit(0)
 
+
+#######
+# default method, checkin
+#
 for param in qs:
   if param not in allowed_parameters:
     print "FATAL: parameter %s not in allowed_parameters" % param

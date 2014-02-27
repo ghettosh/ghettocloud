@@ -27,6 +27,8 @@ MYIP="$(netstat -nI ${INTERFACE_WITH_DEFAULT_GW} | \
 MYMAC="$(netstat -nI ${INTERFACE_WITH_DEFAULT_GW} | \
         grep -oE "([a-zA-Z0-9]+:[a-zA-Z0-9]+){5}")"
 
+export MACADDR=$MYMAC # for sendmsg.pl
+
 UPTIME="$(uptime | cut -d, -f1 | sed -e 's/^[ \t]*//g;s/  / /g')"
 LOADAVG="$(uptime | cut -d, -f4,5,6 | sed -e 's/^[ \t]*//g')"
 
@@ -66,7 +68,7 @@ if [ ! -z ${API_SERVER} ]; then
   #   echo "export PKG_PATH=${PKG_PATH}" >> /root/.profile
   # fi
   MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
-  URL="${API_SERVER}/checkin?update=$(uname -r)&myver=$(md5 $0 | cut -d= -f2)"
+  URL="${API_SERVER}/checkin?update=$(uname -r)&myver=$(md5 $0 | cut -d= -f2 | tr -d ' ')"
   REMOTESUM=$(ftp -Vo- ${URL})
   echo "${REMOTESUM}" | grep 'update_required' > /dev/null 2>&1
   if [ $? -eq 0 ];then
@@ -77,7 +79,7 @@ if [ ! -z ${API_SERVER} ]; then
     cd /tmp
     ftp -V ${TARGETFILE} 2>/dev/null    
     if [ -f /tmp/site${RELEASE}.tgz ]; then                              
-      tar -zxvf /tmp/site${RELEASE}.tgz -C /                           
+      tar -zxvf /tmp/site${RELEASE}.tgz -C / && sendlog.pl "updated site file"
     else                                                                 
       echo "FATAL: File was not downloaded properly"                   
       exit 1                                                           
@@ -102,3 +104,5 @@ if [ ! -z ${API_SERVER} ]; then
   echo "hitting $URL"
   ftp -Vo- -r 2 ${URL} 2>/dev/null
 fi
+
+sendlog.pl "checkin run ended"
