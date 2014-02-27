@@ -91,6 +91,7 @@ function delete-vm(){
 }
 
 function list-events(){
+  # TODO: Add filters
   EVCOUNT=${1}
   if  [[ ! ${EVCOUNT} =~ [0-9+] ]] || \
       [[ ${EVCOUNT} -ge 250 ]] || \
