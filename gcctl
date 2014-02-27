@@ -31,14 +31,18 @@ function list-vms(){
   if [[ $DEBUG ]]; then
     print_yellow "DEBUG: Command -> $command\n"
   fi
-  ${SQLITE3} -header -column ${DBFILE} "SELECT realname as 'Real Name',
-                                               hostname as 'Hostname',
-                                               state as 'State',
-                                               ip as 'IP Address',
-                                               macaddr as 'MAC Address',
-                                               rootpw as 'Root Password',
-                                               hypervisor as 'Host Hypervisor' 
-                                        FROM vms;"
+  ${SQLITE3}  \
+    -header \
+    -column \
+    ${DBFILE} "SELECT realname as 'Real Name',
+                      hostname as 'Hostname',
+                      state as 'State',
+                      ip as 'IP Address',
+                      macaddr as 'MAC Address',
+                      rootpw as 'Root Password',
+                      datetime(creationdate,'unixepoch') AS 'Build Date',
+                      hypervisor as 'Host Hypervisor' 
+               FROM vms;"
 }
 function list-hypervisors(){
   if [[ $DEBUG ]]; then
