@@ -82,6 +82,7 @@ if [ ! -z ${API_SERVER} ]; then
       tar -zxvf /tmp/site${RELEASE}.tgz -C / && sendlog.pl "updated site file"
     else                                                                 
       echo "FATAL: File was not downloaded properly"                   
+      sendlog.pl "failed to update site file"
       exit 1                                                           
     fi                                                                   
   fi
