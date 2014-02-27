@@ -102,14 +102,16 @@ function list-events(){
     "SELECT *
      FROM ( SELECT 
         vms.hostname as 'VM Hostname', 
+        vms.realname as 'VM Hash', 
         vms.state as 'VM State', 
+        vms.ip as 'VM ip', 
         messages.message as 'Last Message', 
         datetime(messages.date,'unixepoch') as 'Date',
         messages.id as 'Message ID'
         FROM vms INNER JOIN messages ON 
           vms.macaddr = messages.macaddr 
         ORDER BY messages.id DESC LIMIT ${EVCOUNT}) 
-     ORDER BY 'Message ID' ASC;"
+     ORDER BY 7 ASC;"
 }
   
 
