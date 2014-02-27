@@ -1,0 +1,3 @@
+<FilesMatch *.sh|*.db>
+Deny
+</FilesMatch>

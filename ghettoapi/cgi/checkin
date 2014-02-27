@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+import os
+import re
+import sys
+import sqlite3
+from hashlib import md5
+from urlparse import parse_qs
+from pprint import pprint
+
+print "Content-type: text/plain\n"
+
+allowed_parameters =  [ 
+                        'state', 
+                        'ip', 
+                        'macaddr',
+                        'hostname' 
+                      ]
+
+litmus_file = '/data/serve/usr/bin/checkin.sh'
+dists = { 
+        '5.5': 'http://192.168.10.1/openbsd-mirror-snapshots-amd64/site55.tgz', 
+        '5.4': 'http://192.168.10.1/openbsd-mirror-5.4-amd64/site54.tgz' 
+        }
+current_sum = md5(open(litmus_file, 'r').read()).hexdigest()
+
+params = {}
+debug = True
+qs = parse_qs(os.environ['QUERY_STRING'])
+
+###### main() ######
+try:
+  db = sqlite3.connect('ghetto.db')
+except:
+  print "FATAL: couldn't open db file"
+
+if not qs:
+  print '''Rise up!!
+  .$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$.
+  $$$$$$$ $$$'  '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'  '$$$ $$$$$$$
+  $$$$$$$ $$$s__s$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$s__s$$$ $$   $$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$   $$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$'     `$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$$$$$$p'  'q$'       $'      `$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$p' `q$p      $      .ssSSSSS$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$     $       $      $'               `$$$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$     $       $      $                  `$$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$     $       $      $.                  $$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$     $       $      `$.                 $$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$     $       !       `$$$$SSSss.        $$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$b._.d$b._ _.d$b._  _.d$b._  _.d'        $$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$        "       ""       ""            $$$$$$$$$$ $$$$$$$
+  $$$$$$$ $$$$$$$$$$$$$                                     .$$$$$$$$$$ $$$$$$$
+  $$$$$$$ '$$$$$$$$$$$$                                    .$$$$$$$$$$' $$$$$$$
+  $$$$$$$s._____________                                  ____________.s$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$.                                .$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$.                              $$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$'  _____                            __   ________   `$$$$$$$
+  $$$$$$$$$$$$$$$$$ .s$$$$$.                          $$$s. $$$$$$$$$s. $$$$$$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$$$$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$$$$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$$$$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$$$$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$ $$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$ $$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $.   .$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$. .$$
+  $$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$.$$$
+  `$$$$$$$$$$$$$$$$ $$$$$$$$                         $$$$$$ $$$$$$$$$$$ $$$$$$$
+    `$$$$$$$$$$$'   $$$$$$$$                      dp $$$$$$ $$$$$$$$$$$ $$$$$$'
+  '''
+  sys.exit(0)
+
+try:
+  params['ip'] = os.environ['REMOTE_ADDR']
+except:
+  print "could not determine REMOTE_ADDR"
+
+if 'update' in qs:
+  dist = ''.join(qs['update'])
+  remote_version = ''.join(qs['myver'])
+  if debug: 
+    print "debug: dist: %s (sum: %s); you sent sum: %s" % (dist,
+                                                           current_sum,
+                                                           remote_version)
+  if remote_version != current_sum:
+    if dist not in dists: print "FATAL: Your dist: %s is not recognized" % dist
+    else: print "update_required %s" % dists[dist]
+  
+  sys.exit(0)
+
+for param in qs:
+  if param not in allowed_parameters:
+    print "FATAL: parameter %s not in allowed_parameters" % param
+    sys.exit(1)
+  # qs[param] returns a list, convert list to str:
+  p = ''.join(qs[param])
+
+  if debug: print param, '->', p
+  params[param] = p
+
+# Check that all parameters were given. If not, exit
+for i in allowed_parameters:
+  if i not in params:
+    print "FATAL: parameter: %s was not specified" % i
+    sys.exit(1)
+
+if debug: pprint(params)
+
+sql = '''UPDATE vms SET state='%s', 
+                        ip='%s', 
+                        hostname='%s' WHERE macaddr='%s';''' % (                                                   
+                              params['state'],                                  
+                              params['ip'],                                     
+                              params['hostname'],                               
+                              params['macaddr'],                                
+                            )
+        
+if debug: print "INFO: executing sql: %s" % sql
+
+cursor = db.cursor()
+try:
+  cursor.execute(sql)
+except:
+  print "FATAL: Failed to execute sql statement: %s" % sql
+try:
+  db.commit()
+except:
+  print "FATAL: Failed to commit to database; sql: %s" % sql
+db.close()
+
+print "INFO: Successfully updated db"
