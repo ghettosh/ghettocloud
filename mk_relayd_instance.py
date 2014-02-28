@@ -99,7 +99,7 @@ table <webhosts-%s> { $webhost0 $webhost1 $webhost2 $webhost3 }
 redirect etcd-%s {
         listen on $ext_addr port %s 
         tag RELAYD
-        forward to <webhosts-%s> port 4001 check icmp
+        forward to <webhosts-%s> port 4001 mode least-states check tcp
 }
 ''' % (cust,cust,port,cust)
     servers = ' '.join(relayd_map[cust])
