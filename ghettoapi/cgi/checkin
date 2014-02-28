@@ -26,7 +26,7 @@ dists = {
 current_sum = md5(open(litmus_file, 'r').read()).hexdigest()
 
 params = {}
-debug = True
+debug = False
 qs = parse_qs(os.environ['QUERY_STRING'])
 
 ###### main() ######
@@ -81,6 +81,46 @@ try:
   params['ip'] = os.environ['REMOTE_ADDR']
 except:
   print "could not determine REMOTE_ADDR"
+
+
+#######
+# print which key etcd is supposed to be using; this value
+# should be grabbed from a discovery url; e.g. https://discovery.etcd.io/new
+#
+if 'discovery' in qs:
+  try:
+    # its a little confusing, but the uri would look like:
+    # /checkin?discovery=c02&key=<hash>
+    customer = ''.join(qs['discovery'])
+  except:
+    print "FATAL: Customer was not specified"
+    sys.exit(1)
+  try:
+    # a password, so not-just-anyone can join an etcd instance
+    key = ''.join(qs['key'])
+  except:
+    print "FATAL: key was not specified"
+    sys.exit(1)
+  sql = ''' SELECT token 
+            FROM discovery 
+            WHERE customer = '%s' and _key = '%s' ''' % (customer,key)
+  if debug: print "INFO: executing sql: %s" % sql
+  cursor = db.cursor()
+  try:
+    cursor.execute(sql)
+  except:
+    print "FATAL: Failed to execute sql statement: %s" % sql
+    sys.exit(1)
+  try:
+    db.commit()
+  except:
+    print "FATAL: Failed to commit to database; sql: %s" % sql
+    sys.exit(1)
+  result = ''.join(cursor.fetchone())
+  db.close()
+  print result
+  sys.exit(0)
+  
 
 #######
 # update the db with a message

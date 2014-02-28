@@ -42,6 +42,11 @@ ${SQLITE3} ${DBFILE} "CREATE TABLE messages (id INTEGER PRIMARY KEY,
                   date TEXT, 
                   macaddr TEXT);"
 
+${SQLITE3} ${DBFILE} "CREATE TABLE discovery (id INTEGER PRIMARY KEY,
+                  token TEXT,
+                  _key TEXT,
+                  customer TEXT);"
+
 echo "==> initialized db"
 echo "==> database schema:"
 ${SQLITE3} ${DBFILE} ".schema"
