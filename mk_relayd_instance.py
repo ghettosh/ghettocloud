@@ -25,9 +25,17 @@ def usage():
   Inspects the sqlite database for ghettocloud and creates relayd instances
   based off of live hosts, and hostnames
 
-""".format(me=sys.argv[0], ul=( len(sys.argv[0]) * '-' ) ) 
+  How to use
+  ----------
+  Simply run {me}, it will examine the database and build relayd configurations
+  for all available vms. The master relayd gets an 'include' line pointing to
+  a configuation file in {cnf}
 
-usage()
+""".format(me=sys.argv[0], ul=( len(sys.argv[0]) * '-' ), cnf=relayd_configs) 
+  sys.exit(1)
+
+if len(sys.argv) > 1:
+  usage()
 
 try:                                                                            
   db = sqlite3.connect(dbfile)
@@ -89,7 +97,7 @@ for cust in customers:
     relayd_config += '''
 table <webhosts-%s> { $webhost0 $webhost1 $webhost2 $webhost3 }
 redirect etcd-%s {
-        listen on $ext_addr port %s interface re1
+        listen on $ext_addr port %s 
         tag RELAYD
         forward to <webhosts-%s> port 4001 check icmp
 }
@@ -108,4 +116,4 @@ redirect etcd-%s {
   master_conf.close()
   print "INFO: Completed configuration for customer %s" % cust
 
-print "Done\n"
+print "INFO: Done"

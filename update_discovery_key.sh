@@ -12,7 +12,7 @@ RCOUNT=$( ${SQLITE3} ${DBFILE} \
 
 if [[ $RCOUNT -eq 1 ]]; then
 
-  DISCOVERY_TKN=$(ftp -Vo- ${DISCOVERY_URL})
+  DISCOVERY_TKN=$(ftp -Vo- ${DISCOVERY_URL} 2>/dev/null)
   KEY=$(echo -n ${CUSTOMER} | sha1)
 
   if [[ -z "${DISCOVERY_TKN}" ]];then
