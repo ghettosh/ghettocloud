@@ -88,10 +88,10 @@ for cust in customers:
 
     relayd_config += '''
 table <webhosts-%s> { $webhost0 $webhost1 $webhost2 $webhost3 }
-redirect www-%s {
+redirect etcd-%s {
         listen on $ext_addr port %s interface re1
         tag RELAYD
-        forward to <webhosts-%s> port www check http "/" code 200
+        forward to <webhosts-%s> port 4001 check icmp
 }
 ''' % (cust,cust,port,cust)
     servers = ' '.join(relayd_map[cust])
