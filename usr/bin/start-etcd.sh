@@ -1,6 +1,16 @@
 #!/usr/bin/env sh
 
+INTERFACE_WITH_DEFAULT_GW=$(netstat -nrfinet | awk '/^default/{print $8}')
+MYMAC="$(netstat -nI ${INTERFACE_WITH_DEFAULT_GW} | \                           
+        grep -oE "([a-zA-Z0-9]+:[a-zA-Z0-9]+){5}")"                             
+export MACADDRESS=${MYMAC}
+
+
 if [[ "${USER}" == "etcd" ]]; then
+  if pgrep etcd > /dev/null 2>&1; then
+    pkill etcd > /dev/null 2>&1
+    sleep 5
+  fi
   ROADSIGN=http://ghetto.sh/roadsign.txt
   API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
   

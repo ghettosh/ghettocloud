@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use HTTP::Tiny;
 use Env qw(MACADDR);
+use POSIX qw(strftime);
 print "INFO: Initializing\n";
 
 my $debug = 1;
@@ -12,7 +13,7 @@ my $api_url = 'http://ghetto.sh/roadsign.txt';
 my $response;
 my $api_target;
 my $api_command;
-my $date = time;
+my $date = strftime "%s", localtime;
 my $return_message;
 my $apicall;
 
