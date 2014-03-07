@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# v1.6
+# v1.8
 
 # ------
 # moving these to cdist

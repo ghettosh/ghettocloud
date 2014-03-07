@@ -97,7 +97,7 @@ function generate_random_mac(){
 function make_openbsd_answerfile(){
     MAC=$1
     NAME=$2
-    FILE=./${MAC}-install.conf
+    FILE=/data/serve/${MAC}-install.conf
     PASSWORD=$(date +%s | md5 | cut -c -12)
     if [ ! -z $ANSWER_FILE ]; then
         print_yellow "INFO:"
@@ -129,7 +129,7 @@ function make_virsh_script(){
     MAC=${1}
     VM=${2}
     VMHASH=$(echo ${RANDOM}${VM}${RANDOM} | md5)
-    INSTALL_SCRIPT="./install_scripts/install-${VMHASH}.sh"
+    INSTALL_SCRIPT="/data/serve/install_scripts/install-${VMHASH}.sh"
     print_blue "INFO:"; printf " Writing shellscript: ${INSTALL_SCRIPT}..."
     echo "str=\"  <interface type='bridge'>\n\"          " > ${INSTALL_SCRIPT}    
     echo "str+=\"   <mac address='${MAC}'/>\n\"         " >> ${INSTALL_SCRIPT}      
@@ -170,7 +170,7 @@ function doit(){
         exit 1
     fi
     print_blue "INFO:"; printf " Executing script on ${TARGET}..."
-    ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT##.*/}" >/dev/null 2>&1
+    ssh -q -tt ${TARGET} "bash ./${INSTALL_SCRIPT//*\/}" >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "ok"
         if [[ $USING_DATABASE == 1 ]]; then

@@ -30,10 +30,11 @@ if [[ "${USER}" == "etcd" ]]; then
   DISCOVERY_URL=$(ftp -Vo- -r5 ${API_SERVER}/${API_COMMAND})
   
   cd /home/etcd/etcd
-  ./bin/etcd \
+  ./bin/etcd -f \
     -name $(uname -n) \
     -peer-addr ${MYIP}:7001 \
     -addr ${MYIP}:4001 \
+    -peer-election-timeout 2000 \
     -discovery ${DISCOVERY_URL} > /dev/null 2>&1 &
   
   sleep 10
