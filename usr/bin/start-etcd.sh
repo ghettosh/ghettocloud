@@ -1,10 +1,15 @@
 #!/usr/bin/env sh
 
+uname -n | grep ^c0 > /dev/null 2>&1
+if [[ $? -ne 0 ]]; then
+  echo "Not a managed customer hostname"
+  exit 1
+fi
+
 INTERFACE_WITH_DEFAULT_GW=$(netstat -nrfinet | awk '/^default/{print $8}')
 MYMAC="$(netstat -nI ${INTERFACE_WITH_DEFAULT_GW} | \                           
         grep -oE "([a-zA-Z0-9]+:[a-zA-Z0-9]+){5}")"                             
 export MACADDRESS=${MYMAC}
-
 
 if [[ "${USER}" == "etcd" ]]; then
   if pgrep etcd > /dev/null 2>&1; then
