@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Author: Niko G
-# Date: 03/07/14
 #
 # A script to kick off multiple 'cdist config' instances via gnu parallel.
 #
