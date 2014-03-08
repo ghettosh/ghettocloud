@@ -31,22 +31,22 @@ def usage():
   for all available vms. The master relayd gets an 'include' line pointing to
   a configuation file in {cnf}
 
-""".format(me=sys.argv[0], ul=( len(sys.argv[0]) * '-' ), cnf=relayd_configs) 
+""".format(me=sys.argv[0], ul=( len(sys.argv[0]) * '-' ), cnf=relayd_configs)
   sys.exit(1)
 
 if len(sys.argv) > 1:
   usage()
 
-try:                                                                            
+try:
   db = sqlite3.connect(dbfile)
-except:                                                                         
-  print "FATAL: couldn't open db file"  
+except:
+  print "FATAL: couldn't open db file"
 
-sql = '''SELECT hostname, ip FROM vms where hostname NOT NULL;''' 
+sql = '''SELECT hostname, ip FROM vms where hostname NOT NULL;'''
 if debug: print "\nDEBUG: Executing sql: {s}\n".format(s=sql)
 
-cursor = db.cursor()                                                          
-cursor.execute(sql)                                                         
+cursor = db.cursor()
+cursor.execute(sql)
 vms = cursor.fetchall()
 db.close()
 
@@ -72,9 +72,9 @@ for cust in customers:
                                                          c=cust)
       vmlist.append(vm[1])
   relayd_map[cust] = vmlist
-      
 
-if debug: 
+
+if debug:
   print "\nDEBUG: relayd_map dict contains:"
   pprint(relayd_map)
   print "\n"
@@ -97,7 +97,7 @@ for cust in customers:
     relayd_config += '''
 table <webhosts-%s> { $webhost0 $webhost1 $webhost2 $webhost3 }
 redirect etcd-%s {
-        listen on $ext_addr port %s 
+        listen on $ext_addr port %s
         tag RELAYD
         forward to <webhosts-%s> port 4001 mode least-states check tcp
 }

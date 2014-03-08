@@ -39,7 +39,7 @@ function cleanup(){
 function waitforit {
   # tastefully stolen from a stack overflow question !
   local pid=$1
-  local delay=0.75
+  local delay=0.5
   local spinstr='|/-\'
   while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
     local temp=${spinstr#?}
@@ -61,6 +61,7 @@ done
 
 if [[ -z ${THREADS} ]]; then
   THREADS=${#HOSTS[@]}
+  printf "[ INFO ]: No amount of threads specified, using ${THREADS}\n"
 fi
 
 printf "[ INFO ]: Running configuration on ${#HOSTS[@]} hosts...\n"
@@ -77,4 +78,5 @@ waitforit $!
 END=$(date +%s)
 RUNTIME=$(( END - START ))
 
-echo -e "\n[ INFO ]: Finished run in ${RUNTIME} seconds, check ${LOGFILE} for output"
+echo -e \
+  "\n[ INFO ]: Finished run in ${RUNTIME} seconds, check ${LOGFILE} for output"
