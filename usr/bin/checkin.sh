@@ -1,18 +1,6 @@
 #!/usr/bin/env sh
 
-# v1.9
-
-# ------
-# moving these to cdist
-# ------
-# function ensure_package {
-#     PKG=$1
-#     if ! pkg_info | grep "^${PKG}" > /dev/null 2>&1; then
-#         . /root/.profile && pkg_add -r ${PKG}
-#     fi
-# }
-# PKGMIRROR="http://openbsd.mirrorcatalogs.com"
-# PATHTOROOTKEY="/static/authorized_keys"
+# v1.10
 
 MYNAME="$(uname -n | cut -d. -f1)"
 MYUNAME="$(uname -a | tr ' ' ',')"
@@ -55,20 +43,7 @@ if [ -z "${LOADAVG}" ]; then
 fi
 
 API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
-# Check for an update to the siteNN.tgz; be very careful!!!
-if [ ! -z ${API_SERVER} ]; then
-  # ------
-  # moving these to cdist
-  # ------
-  # if ! grep 'export PKG_PATH' /root/.profile > /dev/null 2>&1; then
-  #   if [ $(uname -r) == "5.5" ]; then
-  #     RELEASE=snapshots
-  #   else
-  #     RELEASE=`uname -r`
-  #   fi
-  #   PKG_PATH="${PKGMIRROR}/${RELEASE}/packages/`uname -m`"
-  #   echo "export PKG_PATH=${PKG_PATH}" >> /root/.profile
-  # fi
+if [[ ! -z ${API_SERVER} ]]; then
   MYSUM=$(md5 $0 | cut -d= -f2 | tr -d ' ')
   URL="${API_SERVER}/checkin?update=$(uname -r)&myver=$(md5 $0 | cut -d= -f2 | tr -d ' ')"
   REMOTESUM=$(ftp -Vo- ${URL})
@@ -88,13 +63,6 @@ if [ ! -z ${API_SERVER} ]; then
       exit 1                                                           
     fi                                                                   
   fi
-  # ------
-  # moving these to cdist
-  # ------
-  # ensure_package "bash"
-  # ensure_package "python-2.7.6p0"
-
-  # We didn't exit from the above routines, so we'll check in.
   API_COMMAND="checkin?"
   API_COMMAND="${API_COMMAND}state=${STATE}&"
   # API_COMMAND="${API_COMMAND}date=$(date +%s)&"

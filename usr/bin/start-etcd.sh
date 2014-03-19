@@ -7,8 +7,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 INTERFACE_WITH_DEFAULT_GW=$(netstat -nrfinet | awk '/^default/{print $8}')
-MYMAC="$(netstat -nI ${INTERFACE_WITH_DEFAULT_GW} | \                           
-        grep -oE "([a-zA-Z0-9]+:[a-zA-Z0-9]+){5}")"                             
+MYMAC="$(netstat -nI ${INTERFACE_WITH_DEFAULT_GW} |grep -oE "([a-zA-Z0-9]+:[a-zA-Z0-9]+){5}")"                             
 export MACADDRESS=${MYMAC}
 
 if [[ "${USER}" == "etcd" ]]; then
@@ -19,11 +18,9 @@ if [[ "${USER}" == "etcd" ]]; then
   ROADSIGN=http://ghetto.sh/roadsign.txt
   API_SERVER="$(ftp -Vo- -r 5 ${ROADSIGN} 2>/dev/null)"
   
-  MYIP=$(netstat -ni | \
-    grep "^$(netstat -rnfinet | grep ^default | awk '{print $8}')" | \
-    egrep -v "Link|fe80" | awk '{print $4}')
+  MYIP=$(netstat -ni | grep "^$(netstat -rnfinet | grep ^default | awk '{print $8}')" | egrep -v "Link|fe80" | awk '{print $4}')
   
-  if [ -z "${MYIP}" ]; then
+  if [[ -z "${MYIP}" ]]; then
     sendlog.pl "Could not determine IP for etcd listener"
     exit 1
   fi

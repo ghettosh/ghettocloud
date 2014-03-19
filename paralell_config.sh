@@ -70,7 +70,7 @@ printf "[ INFO ]: Executing "
 parallel -v -j ${THREADS} \
    " 
     2>&1 ${CDIST_BIN} ${CDIST_OPTS} {} | while read L; do
-      printf \"[ {} ] (\$(date +%D_%H%M)) \$L\n\"; 
+      printf \"[ {} ] ($(date +%D_%H%M)) \$L\n\"; 
     done
    "  ::: ${HOSTS[@]} > ${LOGFILE} &
 

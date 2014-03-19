@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#
+# Initialize the database
+#
+
 function usage(){
     echo "Usage: $0 <db file>"
     exit 1
@@ -11,8 +15,8 @@ SQLITE3=${SQLITE3:?FATAL: no sqlite3 found}
 DBFILE=$1
 DBFILE=${DBFILE:?$(usage)}
 
-DBUSER="www"
-DBGROUP="daemon"
+DBUSER="www"     # drop privs to www
+DBGROUP="daemon" # drop privs to daemon
 
 if [[ ! ${DBFILE} =~ .*.db ]]; then DBFILE=${DBFILE}.db; fi
 

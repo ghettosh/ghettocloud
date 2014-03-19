@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+# All VMs check in here to look for new siteNN.tgz files
+# and other updates
+
 import os
 import re
 import sys
@@ -28,12 +32,6 @@ current_sum = md5(open(litmus_file, 'r').read()).hexdigest()
 params = {}
 debug = False
 qs = parse_qs(os.environ['QUERY_STRING'])
-
-###### main() ######
-try:
-  db = sqlite3.connect('ghetto.db')
-except:
-  print "FATAL: couldn't open db file"
 
 if not qs:
   print '''Rise up!!
@@ -76,6 +74,11 @@ if not qs:
     `$$$$$$$$$$$'   $$$$$$$$                      dp $$$$$$ $$$$$$$$$$$ $$$$$$'
   '''
   sys.exit(0)
+
+try:
+  db = sqlite3.connect('ghetto.db')
+except:
+  print "FATAL: couldn't open db file"
 
 try:
   params['ip'] = os.environ['REMOTE_ADDR']

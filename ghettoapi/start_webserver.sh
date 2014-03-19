@@ -1,17 +1,20 @@
-#!/usr/bin/env bash
+#!/bin/sh
+
+#
+# Use this to stop/start the webserver
+#
 
 PIDFILE=/var/tmp/httpd-ghettoapi.pid
+RUNLOG=/var/tmp/ghettoapi-run.log
 HTTPDCONF=/data/serve/ghettoapi/conf/ghettoapi-httpd.conf
 
-printf "INFO: Starting or restarting the webserver"
-if [ -r ${PIDFILE} ]; then
+echo "INFO: Starting or restarting the webserver(log:${RUNLOG})..."
+if [ -e ${PIDFILE} ]; then
   kill `cat ${PIDFILE}` > /dev/null 2>&1
 fi
 
-httpd -u \
-      -4 \
-      -f ${HTTPDCONF} > /dev/null 2>&1
+/usr/sbin/httpd -u \
+                -4 \
+                -f ${HTTPDCONF} 2>&1 > ${RUNLOG}
 
-for i in {1..3}; do printf "."; sleep 1; done
-
-echo "New PID: $(cat ${PIDFILE})"
+sleep 3 && echo "INFO: New PID: $(cat ${PIDFILE})"
